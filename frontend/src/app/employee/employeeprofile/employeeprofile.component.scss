@@ -205,3 +205,143 @@
     }
   }
 }
+
+/* Second Container Styles */
+.job-position-container {
+  margin-top: 30px;
+  
+  .job-position-content {
+    padding: 15px;
+    
+    .empty-state {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+    
+    .positions-list {
+      margin-bottom: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      
+      .position-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        .position-icon {
+          margin-right: 12px;
+          color: #9b59b6;
+          font-size: 18px;
+        }
+        
+        .position-text {
+          flex: 1;
+          color: #333;
+          font-weight: 500;
+        }
+        
+        .delete-icon {
+          color: #e74c3c;
+          font-size: 18px;
+          cursor: pointer;
+          padding: 5px;
+        }
+      }
+    }
+    
+    .add-button-container {
+      margin-top: 15px;
+      
+      ion-button {
+        --border-radius: 8px;
+        --padding-top: 15px;
+        --padding-bottom: 15px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+/* Modal Styles */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.add-position-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  border-radius: 12px;
+  z-index: 1001;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    
+    h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #333;
+    }
+    
+    ion-icon {
+      font-size: 1.5rem;
+      color: #666;
+      cursor: pointer;
+    }
+  }
+  
+  .modal-content {
+    padding: 20px;
+    
+    ion-item {
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      --border-color: #e0e0e0;
+      margin-bottom: 15px;
+      
+      ion-select {
+        width: 100%;
+      }
+    }
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    
+    ion-button {
+      margin-left: 10px;
+      --border-radius: 6px;
+      --padding-start: 20px;
+      --padding-end: 20px;
+    }
+  }
+}

@@ -1,10 +1,12 @@
-import sqlite3
+import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
-from .models import User
-import json
+from .models import User, JobPosition
+from django.views.decorators.http import require_http_methods
+import sqlite3
 from django.db import connection
+from django.db import IntegrityError
 
 @csrf_exempt
 def register(request):
@@ -115,3 +117,78 @@ def get_profile(request):
             return JsonResponse({'error': str(e)}, status=500)
     
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_job_positions(request):
+    uid = request.GET.get('uid')
+    if not uid:
+        return JsonResponse({'error': 'UID is required'}, status=400)
+    
+    try:
+        positions = JobPosition.objects.filter(user__uid=uid).values('id', 'position', 'created_at')
+        return JsonResponse(list(positions), safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_job_position(request):
+    try:
+        data = json.loads(request.body)
+        uid = data.get('user')
+        position = data.get('position')
+        
+        if not uid or not position:
+            return JsonResponse(
+                {'error': 'User UID and position are required'}, 
+                status=400
+            )
+            
+        try:
+            user = User.objects.get(uid=uid)
+            
+            # Check if position already exists for this user
+            if JobPosition.objects.filter(user=user, position=position).exists():
+                return JsonResponse(
+                    {'error': 'This position already exists for the user'},
+                    status=400
+                )
+                
+            job_position = JobPosition.objects.create(user=user, position=position)
+            
+            return JsonResponse({
+                'id': job_position.id,
+                'position': job_position.position,
+                'created_at': job_position.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            }, status=201)
+            
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except IntegrityError:
+            return JsonResponse(
+                {'error': 'Database error - position may already exist'},
+                status=400
+            )
+            
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse(
+            {'error': f'Server error: {str(e)}'},
+            status=500
+        )
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_job_position(request, position_id):
+    try:
+        position = JobPosition.objects.get(id=position_id)
+        position.delete()
+        return JsonResponse({'success': True}, status=200)
+    except JobPosition.DoesNotExist:
+        return JsonResponse({'error': 'Position not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

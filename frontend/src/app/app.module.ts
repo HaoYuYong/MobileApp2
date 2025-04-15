@@ -9,7 +9,7 @@ import { appRoutes } from './app.routes';
 import { HomeComponent } from './employee/employeehome/employeehome.component';
 import { JobseekComponent } from './employee/jobseek/jobseek.component';
 import { CreatecvComponent } from './employee/createcv/createcv.component';
-import { ProfileComponent } from './employee/employeeprofile/employeeprofile.component';
+import { EmployeeprofileComponent } from './employee/employeeprofile/employeeprofile.component';
 //General
 import { HeaderComponent } from './header/header.component'; // Import HeaderComponent
 import { LoginComponent } from './login/login.component';
@@ -35,7 +35,7 @@ import { provideHttpClient } from '@angular/common/http';
     HomeComponent,
     JobseekComponent,
     CreatecvComponent,
-    ProfileComponent,
+    EmployeeprofileComponent,
     LoginComponent,
     RegisterComponent,
     CompanyhomeComponent,

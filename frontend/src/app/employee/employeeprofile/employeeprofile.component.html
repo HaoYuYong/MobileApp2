@@ -51,11 +51,68 @@
               <ion-input [value]="userProfile.address" readonly></ion-input>
             </ion-item>
           </div>
-        </div>
-        
-        <!-- Rest of Profile Details (always visible) -->
-        
+        </div>      
       </div>
     </div>
   </div>
+
+    <!-- Second Container for Job Positions -->
+    <div class="container job-position-container">
+      <div class="title">Job Position Applying</div>
+      
+      <div class="job-position-content">
+        <!-- Loading state for job positions -->
+        <div *ngIf="isLoadingPositions" class="loading-spinner">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
+        
+        <!-- Empty state -->
+        <div *ngIf="!isLoadingPositions && (!jobPositions || jobPositions.length === 0)" class="empty-state">
+          <p>Job Position currently empty, try adding some positions you're looking for.</p>
+        </div>
+        
+        <!-- Job positions list -->
+        <div *ngIf="!isLoadingPositions && jobPositions && jobPositions.length > 0" class="positions-list">
+          <div class="position-item" *ngFor="let position of jobPositions">
+            <ion-icon name="briefcase-outline" class="position-icon"></ion-icon>
+            <span class="position-text">{{ position.position }}</span>
+            <ion-icon name="remove-circle-outline" class="delete-icon" (click)="deletePosition(position.id)"></ion-icon>
+          </div>
+        </div>
+        
+        <!-- Add button -->
+        <div class="add-button-container">
+          <ion-button expand="block" (click)="openAddPositionModal()" class="add-button">
+            <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+            Add Position
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Position Modal -->
+    <div class="modal-backdrop" *ngIf="showAddPositionModal" (click)="closeAddPositionModal()"></div>
+    
+    <div class="add-position-modal" *ngIf="showAddPositionModal">
+      <div class="modal-header">
+        <h3>Add Job Position</h3>
+        <ion-icon name="close-outline" (click)="closeAddPositionModal()"></ion-icon>
+      </div>
+      
+      <div class="modal-content">
+        <ion-item>
+          <ion-label position="stacked">Select Position</ion-label>
+          <ion-select [(ngModel)]="selectedPosition" interface="popover" placeholder="Select a position">
+            <ion-select-option *ngFor="let position of positionOptions" [value]="position">
+              {{ position }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+      
+      <div class="modal-footer">
+        <ion-button fill="outline" (click)="closeAddPositionModal()">Cancel</ion-button>
+        <ion-button fill="solid" (click)="savePosition()" [disabled]="!selectedPosition">Save</ion-button>
+      </div>
+    </div>
 </ion-content>

@@ -115,4 +115,59 @@
         <ion-button fill="solid" (click)="savePosition()" [disabled]="!selectedPosition">Save</ion-button>
       </div>
     </div>
+
+
+
+    <!-- Third Container - About Me -->
+    <div class="container about-me-container">
+      <div class="title">About Me</div>
+      
+      <div class="about-me-content">
+        <!-- View Mode -->
+        <div *ngIf="!isAboutMeEditMode" class="about-me-view">
+          <p class="about-me-text">{{ aboutMeData?.about || 'No information added yet' }}</p>
+        </div>
+        
+        <!-- Edit Mode -->
+        <div *ngIf="isAboutMeEditMode" class="about-me-edit">
+          <ion-textarea
+            [(ngModel)]="tempAboutMe"
+            placeholder="Tell us about yourself (at least 2 paragraphs)"
+            autoGrow="true"
+            rows="6"
+            class="about-me-textarea"
+          ></ion-textarea>
+        </div>
+        
+        <!-- Action buttons -->
+        <div class="action-buttons">
+          <!-- Edit button (shown in view mode) -->
+          <ion-button *ngIf="!isAboutMeEditMode"
+                    expand="block" fill="outline" color="medium"
+                    (click)="enterAboutMeEditMode()">
+            <ion-icon slot="start" name="create-outline"></ion-icon>
+            Edit
+          </ion-button>
+          
+          <!-- Cancel button (shown in edit mode) -->
+          <ion-button *ngIf="isAboutMeEditMode"
+                    expand="block" fill="outline" color="danger"
+                    (click)="cancelAboutMeEdit()">
+            <ion-icon slot="start" name="close-outline"></ion-icon>
+            Cancel
+          </ion-button>
+          
+          <!-- Save button (shown in edit mode) -->
+          <ion-button *ngIf="isAboutMeEditMode"
+                    expand="block" fill="solid" color="success"
+                    [disabled]="!hasAboutMeChanges()"
+                    (click)="saveAboutMe()">
+            <ion-icon slot="start" name="save-outline"></ion-icon>
+            Save Changes
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+
 </ion-content>

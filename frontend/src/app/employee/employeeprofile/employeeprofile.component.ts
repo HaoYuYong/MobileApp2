@@ -21,7 +21,9 @@ import {
   trashOutline,
   trash,
   addCircleOutline,
-  removeCircleOutline
+  removeCircleOutline,
+  createOutline,
+  saveOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -45,6 +47,11 @@ export class EmployeeprofileComponent implements OnInit {
   isLoadingPositions = true;
   showAddPositionModal = false;
   selectedPosition: string | null = null;
+
+  // About me properties
+  aboutMeData: any = null;
+  isAboutMeEditMode: boolean = false;
+  tempAboutMe: string = '';
   
   positionOptions = [
     'Engineer', 'Doctor', 'Accounting', 'Marketing', 'Part Timer', 
@@ -76,7 +83,9 @@ export class EmployeeprofileComponent implements OnInit {
       trash,
       'trash-outline': trashOutline,
       'add-circle-outline': addCircleOutline,
-      'remove-circle-outline': removeCircleOutline
+      'remove-circle-outline': removeCircleOutline,
+      'create-outline': createOutline,
+      'save-outline': saveOutline
     });
   }
 
@@ -98,6 +107,7 @@ export class EmployeeprofileComponent implements OnInit {
           this.userProfile = profile;
           this.isLoading = false;
           this.loadJobPositions(user.uid);
+          this.loadAboutMe(user.uid);
         },
         error: (err) => {
           console.error('Error loading profile:', err);
@@ -136,6 +146,63 @@ export class EmployeeprofileComponent implements OnInit {
         } else {
           this.jobPositions = [];
         }
+      }
+    });
+  }
+
+  // About Me methods
+  loadAboutMe(uid: string) {
+    console.log('Loading About Me for uid:', uid);
+    this.http.get(`${this.apiUrl}/api/about-me/?uid=${uid}`).subscribe({
+      next: (data: any) => {
+        console.log('About Me loaded:', data);
+        this.aboutMeData = data;
+        this.tempAboutMe = data?.about || '';
+      },
+      error: (error) => {
+        console.error('Error loading About Me:', error);
+        if (error.status !== 404) {
+          this.showAlert('Error', 'Failed to load About Me');
+        }
+      }
+    });
+  }
+
+  enterAboutMeEditMode() {
+    this.isAboutMeEditMode = true;
+    this.tempAboutMe = this.aboutMeData?.about || '';
+  }
+
+  cancelAboutMeEdit() {
+    this.isAboutMeEditMode = false;
+  }
+
+  hasAboutMeChanges(): boolean {
+    return this.tempAboutMe !== (this.aboutMeData?.about || '');
+  }
+
+  saveAboutMe() {
+    const userData = sessionStorage.getItem('currentUser');
+    if (!userData) {
+      this.showAlert('Error', 'User not logged in');
+      return;
+    }
+
+    const user = JSON.parse(userData);
+    const aboutData = {
+      uid: user.uid,
+      about: this.tempAboutMe
+    };
+
+    this.http.post(`${this.apiUrl}/api/about-me/`, aboutData).subscribe({
+      next: (response: any) => {
+        this.aboutMeData = response;
+        this.isAboutMeEditMode = false;
+        this.showAlert('Success', 'About Me updated successfully');
+      },
+      error: async (error) => {
+        console.error('Error saving About Me:', error);
+        await this.showAlert('Error', 'Failed to update About Me');
       }
     });
   }

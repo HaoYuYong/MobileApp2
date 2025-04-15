@@ -156,3 +156,20 @@ class JobPosition(models.Model):
 
     def __str__(self):
         return f"{self.user.name} - {self.position}"
+
+# About me Database table  
+class AboutMe(models.Model):
+    aid = models.AutoField(primary_key=True)
+    uid = models.CharField(max_length=100)
+    about = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'about_me'
+        indexes = [
+            models.Index(fields=['uid']),
+        ]
+
+    def __str__(self):
+        return f"About Me for {self.uid}"

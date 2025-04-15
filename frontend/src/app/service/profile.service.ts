@@ -125,4 +125,12 @@ export class ProfileService {
     });
     await alert.present();
   }
+
+  getAboutMe(uid: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/about-me/?uid=${uid}`);
+  }
+  
+  saveAboutMe(data: {uid: string, about: string}): Observable<any> {
+    return this.http.post(`${this.apiUrl}/api/about-me/`, data);
+  }
 }

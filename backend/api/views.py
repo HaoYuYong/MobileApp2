@@ -2,7 +2,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
-from .models import User, JobPosition
+from .models import User, JobPosition, AboutMe
 from django.views.decorators.http import require_http_methods
 import sqlite3
 from django.db import connection
@@ -192,3 +192,64 @@ def delete_job_position(request, position_id):
         return JsonResponse({'error': 'Position not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_about_me(request):
+    uid = request.GET.get('uid')
+    if not uid:
+        return JsonResponse({'error': 'UID is required'}, status=400)
+    
+    try:
+        about_me = AboutMe.objects.filter(uid=uid).first()
+        if about_me:
+            return JsonResponse({
+                'aid': about_me.aid,
+                'uid': about_me.uid,
+                'about': about_me.about,
+                'created_at': about_me.created_at,
+                'updated_at': about_me.updated_at
+            })
+        return JsonResponse({'about': ''})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def save_about_me(request):
+    try:
+        data = json.loads(request.body)
+        uid = data.get('uid')
+        about = data.get('about', '')
+        
+        if not uid:
+            return JsonResponse({'error': 'UID is required'}, status=400)
+        
+        # Create or update
+        about_me, created = AboutMe.objects.update_or_create(
+            uid=uid,
+            defaults={'about': about}
+        )
+        
+        return JsonResponse({
+            'aid': about_me.aid,
+            'uid': about_me.uid,
+            'about': about_me.about,
+            'created_at': about_me.created_at,
+            'updated_at': about_me.updated_at
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def about_me_handler(request):
+    if request.method == 'GET':
+        return get_about_me(request)
+    elif request.method == 'POST':
+        return save_about_me(request)

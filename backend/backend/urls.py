@@ -11,4 +11,5 @@ urlpatterns = [
     path('api/job-positions/', views.create_job_position, name='create-job-position'),
     path('api/job-positions/list/', views.get_job_positions, name='get-job-positions'),
     path('api/job-positions/delete/<int:position_id>/', views.delete_job_position, name='delete-job-position'),
+    path('api/about-me/', views.about_me_handler, name='about_me'),
 ]

@@ -1,9 +1,9 @@
 <ion-content>
   <div class="container">
-    <div class="title">{{ userProfile?.name ? userProfile.name  : 'My Profile' }}</div>
+    <div class="title">{{ userProfile?.name ? userProfile.name : 'My Profile' }}</div>
     
     <div class="content">
-      <!-- Loading and error states remain the same -->
+      <!-- Loading and error states -->
       <div *ngIf="isLoading" class="loading-spinner">
         <ion-spinner name="crescent"></ion-spinner>
       </div>
@@ -13,7 +13,6 @@
       </div>
       
       <div *ngIf="!isLoading && !errorMessage" class="profile-details">
-
         <ion-item>
           <ion-label position="stacked">Role</ion-label>
           <ion-input [value]="userProfile.role" readonly></ion-input>
@@ -35,7 +34,6 @@
           </div>
           
           <div class="basic-info-content" *ngIf="isDropdownOpen">
-
             <ion-item>
               <ion-label position="stacked">Phone</ion-label>
               <ion-input type="tel" [value]="userProfile.phone" readonly></ion-input>
@@ -56,118 +54,220 @@
     </div>
   </div>
 
-    <!-- Second Container for Job Positions -->
-    <div class="container job-position-container">
-      <div class="title">Job Position Applying</div>
+  <!-- Second Container for Job Positions -->
+  <div class="container job-position-container">
+    <div class="title">Job Position Applying</div>
+    
+    <div class="job-position-content">
+      <!-- Loading state for job positions -->
+      <div *ngIf="isLoadingPositions" class="loading-spinner">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
       
-      <div class="job-position-content">
-        <!-- Loading state for job positions -->
-        <div *ngIf="isLoadingPositions" class="loading-spinner">
-          <ion-spinner name="crescent"></ion-spinner>
+      <!-- Empty state -->
+      <div *ngIf="!isLoadingPositions && (!jobPositions || jobPositions.length === 0)" class="empty-state">
+        <p>Job Position currently empty, try adding some positions you're looking for.</p>
+      </div>
+      
+      <!-- Job positions list -->
+      <div *ngIf="!isLoadingPositions && jobPositions && jobPositions.length > 0" class="positions-list">
+        <div class="position-item" *ngFor="let position of jobPositions">
+          <ion-icon name="briefcase-outline" class="position-icon"></ion-icon>
+          <span class="position-text">{{ position.position }}</span>
+          <ion-icon name="remove-circle-outline" class="delete-icon" (click)="deletePosition(position.id)"></ion-icon>
         </div>
+      </div>
+      
+      <!-- Add button -->
+      <div class="add-button-container">
+        <ion-button expand="block" (click)="openAddPositionModal()" class="add-button">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Add Position
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Position Modal -->
+  <div class="modal-backdrop" *ngIf="showAddPositionModal" (click)="closeAddPositionModal()"></div>
+  
+  <div class="add-position-modal" *ngIf="showAddPositionModal">
+    <div class="modal-header">
+      <h3>Add Job Position</h3>
+      <ion-icon name="close-outline" (click)="closeAddPositionModal()"></ion-icon>
+    </div>
+    
+    <div class="modal-content">
+      <ion-item>
+        <ion-label position="stacked">Select Position</ion-label>
+        <ion-select [(ngModel)]="selectedPosition" interface="popover" placeholder="Select a position">
+          <ion-select-option *ngFor="let position of positionOptions" [value]="position">
+            {{ position }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+    </div>
+    
+    <div class="modal-footer">
+      <ion-button fill="outline" (click)="closeAddPositionModal()">Cancel</ion-button>
+      <ion-button fill="solid" (click)="savePosition()" [disabled]="!selectedPosition">Save</ion-button>
+    </div>
+  </div>
+
+  <!-- Third Container - About Me -->
+  <div class="container about-me-container">
+    <div class="title">About Me</div>
+    
+    <div class="about-me-content">
+      <!-- View Mode -->
+      <div *ngIf="!isAboutMeEditMode" class="about-me-view">
+        <p class="about-me-text">{{ aboutMeData?.about || 'No information added yet' }}</p>
+      </div>
+      
+      <!-- Edit Mode -->
+      <div *ngIf="isAboutMeEditMode" class="about-me-edit">
+        <ion-textarea
+          [(ngModel)]="tempAboutMe"
+          placeholder="Tell us about yourself (at least 2 paragraphs)"
+          autoGrow="true"
+          rows="6"
+          class="about-me-textarea"
+        ></ion-textarea>
+      </div>
+      
+      <!-- Action buttons -->
+      <div class="action-buttons">
+        <!-- Edit button (shown in view mode) -->
+        <ion-button *ngIf="!isAboutMeEditMode"
+                  expand="block" fill="outline" color="medium"
+                  (click)="enterAboutMeEditMode()">
+          <ion-icon slot="start" name="create-outline"></ion-icon>
+          Edit
+        </ion-button>
         
-        <!-- Empty state -->
-        <div *ngIf="!isLoadingPositions && (!jobPositions || jobPositions.length === 0)" class="empty-state">
-          <p>Job Position currently empty, try adding some positions you're looking for.</p>
-        </div>
+        <!-- Cancel button (shown in edit mode) -->
+        <ion-button *ngIf="isAboutMeEditMode"
+                  expand="block" fill="outline" color="danger"
+                  (click)="cancelAboutMeEdit()">
+          <ion-icon slot="start" name="close-outline"></ion-icon>
+          Cancel
+        </ion-button>
         
-        <!-- Job positions list -->
-        <div *ngIf="!isLoadingPositions && jobPositions && jobPositions.length > 0" class="positions-list">
-          <div class="position-item" *ngFor="let position of jobPositions">
-            <ion-icon name="briefcase-outline" class="position-icon"></ion-icon>
-            <span class="position-text">{{ position.position }}</span>
-            <ion-icon name="remove-circle-outline" class="delete-icon" (click)="deletePosition(position.id)"></ion-icon>
+        <!-- Save button (shown in edit mode) -->
+        <ion-button *ngIf="isAboutMeEditMode"
+                  expand="block" fill="solid" color="success"
+                  [disabled]="!hasAboutMeChanges()"
+                  (click)="saveAboutMe()">
+          <ion-icon slot="start" name="save-outline"></ion-icon>
+          Save Changes
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fourth Container - Education -->
+  <div class="container education-container">
+    <div class="title">Education</div>
+    
+    <div class="education-content">
+      <!-- Loading state -->
+      <div *ngIf="isLoadingEducations" class="loading-spinner">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="!isLoadingEducations && educations.length === 0" class="empty-state">
+        <p>No education records added yet.</p>
+      </div>
+      
+      <!-- Education list -->
+      <div *ngIf="!isLoadingEducations && educations.length > 0" class="education-list">
+        <div *ngFor="let edu of educations" class="education-item">
+          <div class="education-view">
+            <div class="education-header">
+              <ion-icon name="school-outline" class="education-icon"></ion-icon>
+              <h3 class="education-degree">{{ edu.degree }} in {{ edu.field_of_study }}</h3>
+              <ion-icon *ngIf="isEditingEducation" name="create-outline" class="edit-icon" 
+                       (click)="editEducation(edu)"></ion-icon>
+              <ion-icon *ngIf="isEditingEducation" name="trash-outline" class="delete-icon" 
+                       (click)="deleteEducation(edu.eid)"></ion-icon>
+            </div>
+            <div class="education-details">
+              <p class="education-school">{{ edu.school }}</p>
+              <p class="education-description" *ngIf="edu.description">{{ edu.description }}</p>
+            </div>
           </div>
         </div>
-        
+      </div>
+      
+      <!-- Action buttons -->
+      <div class="action-buttons">
         <!-- Add button -->
-        <div class="add-button-container">
-          <ion-button expand="block" (click)="openAddPositionModal()" class="add-button">
-            <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-            Add Position
-          </ion-button>
-        </div>
+        <ion-button *ngIf="!isEditingEducation"
+                  expand="block" (click)="openAddEducationModal()">
+          <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+          Add Education
+        </ion-button>
+        
+        <!-- Edit button -->
+        <ion-button *ngIf="educations.length > 0 && !isEditingEducation"
+                  expand="block" fill="outline" color="medium" (click)="toggleEditEducationMode()">
+          <ion-icon slot="start" name="create-outline"></ion-icon>
+          Edit
+        </ion-button>
+        
+        <!-- Cancel edit button -->
+        <ion-button *ngIf="isEditingEducation"
+                  expand="block" fill="outline" color="danger" (click)="toggleEditEducationMode()">
+          <ion-icon slot="start" name="close-outline"></ion-icon>
+          Cancel Edit
+        </ion-button>
       </div>
     </div>
+  </div>
 
-    <!-- Add Position Modal -->
-    <div class="modal-backdrop" *ngIf="showAddPositionModal" (click)="closeAddPositionModal()"></div>
+  <!-- Add Education Modal -->
+  <div class="modal-backdrop" *ngIf="showAddEducationModal" (click)="closeAddEducationModal()"></div>
+  
+  <div class="add-education-modal" *ngIf="showAddEducationModal">
+    <div class="modal-header">
+      <h3>{{ currentlyEditingEducationId ? 'Edit Education' : 'Add Education' }}</h3>
+      <ion-icon name="close-outline" (click)="closeAddEducationModal()"></ion-icon>
+    </div>
     
-    <div class="add-position-modal" *ngIf="showAddPositionModal">
-      <div class="modal-header">
-        <h3>Add Job Position</h3>
-        <ion-icon name="close-outline" (click)="closeAddPositionModal()"></ion-icon>
-      </div>
+    <div class="modal-content">
+      <ion-item>
+        <ion-label position="stacked">School</ion-label>
+        <ion-input [(ngModel)]="educationModalData.school" placeholder="e.g. University of Technology"></ion-input>
+      </ion-item>
       
-      <div class="modal-content">
-        <ion-item>
-          <ion-label position="stacked">Select Position</ion-label>
-          <ion-select [(ngModel)]="selectedPosition" interface="popover" placeholder="Select a position">
-            <ion-select-option *ngFor="let position of positionOptions" [value]="position">
-              {{ position }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-      </div>
+      <ion-item>
+        <ion-label position="stacked">Degree</ion-label>
+        <ion-select [(ngModel)]="educationModalData.degree" interface="popover" placeholder="Select degree">
+          <ion-select-option *ngFor="let degree of degreeOptions" [value]="degree.value">
+            {{ degree.label }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
       
-      <div class="modal-footer">
-        <ion-button fill="outline" (click)="closeAddPositionModal()">Cancel</ion-button>
-        <ion-button fill="solid" (click)="savePosition()" [disabled]="!selectedPosition">Save</ion-button>
-      </div>
+      <ion-item>
+        <ion-label position="stacked">Field of Study</ion-label>
+        <ion-input [(ngModel)]="educationModalData.field_of_study" placeholder="e.g. Computer Science"></ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Description (Optional)</ion-label>
+        <ion-textarea [(ngModel)]="educationModalData.description" rows="3" 
+                     placeholder="Additional details about your education"></ion-textarea>
+      </ion-item>
     </div>
-
-
-
-    <!-- Third Container - About Me -->
-    <div class="container about-me-container">
-      <div class="title">About Me</div>
-      
-      <div class="about-me-content">
-        <!-- View Mode -->
-        <div *ngIf="!isAboutMeEditMode" class="about-me-view">
-          <p class="about-me-text">{{ aboutMeData?.about || 'No information added yet' }}</p>
-        </div>
-        
-        <!-- Edit Mode -->
-        <div *ngIf="isAboutMeEditMode" class="about-me-edit">
-          <ion-textarea
-            [(ngModel)]="tempAboutMe"
-            placeholder="Tell us about yourself (at least 2 paragraphs)"
-            autoGrow="true"
-            rows="6"
-            class="about-me-textarea"
-          ></ion-textarea>
-        </div>
-        
-        <!-- Action buttons -->
-        <div class="action-buttons">
-          <!-- Edit button (shown in view mode) -->
-          <ion-button *ngIf="!isAboutMeEditMode"
-                    expand="block" fill="outline" color="medium"
-                    (click)="enterAboutMeEditMode()">
-            <ion-icon slot="start" name="create-outline"></ion-icon>
-            Edit
-          </ion-button>
-          
-          <!-- Cancel button (shown in edit mode) -->
-          <ion-button *ngIf="isAboutMeEditMode"
-                    expand="block" fill="outline" color="danger"
-                    (click)="cancelAboutMeEdit()">
-            <ion-icon slot="start" name="close-outline"></ion-icon>
-            Cancel
-          </ion-button>
-          
-          <!-- Save button (shown in edit mode) -->
-          <ion-button *ngIf="isAboutMeEditMode"
-                    expand="block" fill="solid" color="success"
-                    [disabled]="!hasAboutMeChanges()"
-                    (click)="saveAboutMe()">
-            <ion-icon slot="start" name="save-outline"></ion-icon>
-            Save Changes
-          </ion-button>
-        </div>
-      </div>
+    
+    <div class="modal-footer">
+      <ion-button fill="outline" (click)="closeAddEducationModal()">Cancel</ion-button>
+      <ion-button fill="solid" (click)="currentlyEditingEducationId ? updateEducation() : saveEducation()" 
+                 [disabled]="!educationModalData.school || !educationModalData.degree || !educationModalData.field_of_study">
+        {{ currentlyEditingEducationId ? 'Save Changes' : 'Save' }}
+      </ion-button>
     </div>
-
-
+  </div>
 </ion-content>

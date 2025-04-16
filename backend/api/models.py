@@ -173,3 +173,36 @@ class AboutMe(models.Model):
 
     def __str__(self):
         return f"About Me for {self.uid}"
+
+# Education Database table    
+class Education(models.Model):
+    DEGREE_CHOICES = [
+        ('High School', 'High School'),
+        ('Bachelor', 'Bachelor\'s'),
+        ('Master', 'Master\'s'),
+        ('PhD', 'PhD'),
+        ('Other', 'Other'),
+    ]
+
+    eid = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='educations',
+        db_column='uid',
+        to_field='uid'
+    )
+    school = models.CharField(max_length=255)
+    degree = models.CharField(max_length=20, choices=DEGREE_CHOICES)
+    field_of_study = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'education'
+        verbose_name = 'Education'
+        verbose_name_plural = 'Educations'
+
+    def __str__(self):
+        return f"{self.degree} at {self.school} ({self.user.uid})"  

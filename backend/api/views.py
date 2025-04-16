@@ -2,11 +2,15 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
-from .models import User, JobPosition, AboutMe
+from .models import User, JobPosition, AboutMe, Education
 from django.views.decorators.http import require_http_methods
 import sqlite3
 from django.db import connection
 from django.db import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 
 @csrf_exempt
 def register(request):
@@ -253,3 +257,131 @@ def about_me_handler(request):
         return get_about_me(request)
     elif request.method == 'POST':
         return save_about_me(request)
+
+# Education Views
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_educations(request, uid):
+    try:
+        educations = Education.objects.filter(user__uid=uid).order_by('-created_at')
+        data = [{
+            'eid': education.eid,
+            'school': education.school,
+            'degree': education.degree,
+            'field_of_study': education.field_of_study,
+            'description': education.description,
+            'created_at': education.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'updated_at': education.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+        } for education in educations]
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_education(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Validate required fields
+        required_fields = ['uid', 'school', 'degree', 'field_of_study']
+        if not all(field in data for field in required_fields):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        # Check if user exists
+        try:
+            user = User.objects.get(uid=data['uid'])
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        
+        # Create education record
+        education = Education.objects.create(
+            user=user,
+            school=data['school'],
+            degree=data['degree'],
+            field_of_study=data['field_of_study'],
+            description=data.get('description', '')
+        )
+        
+        return JsonResponse({
+            'eid': education.eid,
+            'message': 'Education added successfully',
+            'education': {
+                'eid': education.eid,
+                'school': education.school,
+                'degree': education.degree,
+                'field_of_study': education.field_of_study,
+                'description': education.description,
+                'created_at': education.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'updated_at': education.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+        }, status=201)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["PUT"])
+def update_education(request, eid):
+    try:
+        data = json.loads(request.body)
+        
+        try:
+            education = Education.objects.get(eid=eid)
+        except Education.DoesNotExist:
+            return JsonResponse({'error': 'Education not found'}, status=404)
+        
+        # Update fields if they exist in the request
+        if 'school' in data:
+            education.school = data['school']
+        if 'degree' in data:
+            education.degree = data['degree']
+        if 'field_of_study' in data:
+            education.field_of_study = data['field_of_study']
+        if 'description' in data:
+            education.description = data['description']
+        
+        education.save()
+        
+        return JsonResponse({
+            'message': 'Education updated successfully',
+            'education': {
+                'eid': education.eid,
+                'school': education.school,
+                'degree': education.degree,
+                'field_of_study': education.field_of_study,
+                'description': education.description,
+                'created_at': education.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'updated_at': education.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+        }, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_education(request, eid):
+    try:
+        education = Education.objects.get(eid=eid)
+        education.delete()
+        return JsonResponse({'message': 'Education deleted successfully'}, status=200)
+    except Education.DoesNotExist:
+        return JsonResponse({'error': 'Education not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def education_handler(request, uid=None, eid=None):
+    if request.method == 'GET' and uid:
+        return get_educations(request, uid)
+    elif request.method == 'POST':
+        return add_education(request)
+    elif request.method == 'PUT' and eid:
+        return update_education(request, eid)
+    elif request.method == 'DELETE' and eid:
+        return delete_education(request, eid)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)

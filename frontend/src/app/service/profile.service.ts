@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, throwError  } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AlertController } from '@ionic/angular';
@@ -12,10 +12,12 @@ export class ProfileService {
   private apiUrl = `${environment.apiUrl}/api`; // Using environment variable
   private currentProfileSubject = new BehaviorSubject<any>(null);
   private jobPositionsSubject = new BehaviorSubject<any[]>([]);
+  private educationsSubject = new BehaviorSubject<any[]>([]);
   
   // Observable streams
   currentProfile$ = this.currentProfileSubject.asObservable();
   jobPositions$ = this.jobPositionsSubject.asObservable();
+  educations$ = this.educationsSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -112,6 +114,114 @@ export class ProfileService {
     );
   }
 
+  // About Me Methods
+  getAboutMe(uid: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/about-me/?uid=${uid}`).pipe(
+      catchError((error) => {
+        console.error('Error fetching about me:', error);
+        return throwError(() => new Error(error));
+      })
+    );
+  }
+  
+  saveAboutMe(data: {uid: string, about: string}): Observable<any> {
+    return this.http.post(`${this.apiUrl}/about-me/`, data).pipe(
+      catchError((error) => {
+        console.error('Error saving about me:', error);
+        return throwError(() => new Error(error));
+      })
+    );
+  }
+
+  // Education Methods
+  /**
+   * Fetch education records for user
+   * @param uid User ID
+   */
+  getEducations(uid: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/educations/${uid}/`).pipe(
+      tap((educations) => {
+        this.educationsSubject.next(educations);
+      }),
+      catchError((error) => {
+        console.error('Error fetching educations:', error);
+        this.showAlert('Education Error', 'Failed to load education history');
+        return throwError(() => new Error(error));
+      })
+    );
+  }
+
+  /**
+   * Add new education record
+   * @param educationData {uid: string, school: string, degree: string, field_of_study: string, description?: string}
+   */
+  addEducation(educationData: {
+    uid: string,
+    school: string,
+    degree: string,
+    field_of_study: string,
+    description?: string
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/educations/`, educationData).pipe(
+      tap((newEducation) => {
+        const currentEducations = this.educationsSubject.value;
+        this.educationsSubject.next([...currentEducations, newEducation]);
+      }),
+      catchError((error) => {
+        console.error('Error adding education:', error);
+        this.showAlert('Add Education Error', error.error?.message || 'Failed to add education');
+        return throwError(() => new Error(error));
+      })
+    );
+  }
+
+  /**
+   * Update existing education record
+   * @param eid Education ID
+   * @param educationData {school?: string, degree?: string, field_of_study?: string, description?: string}
+   */
+  updateEducation(eid: number, educationData: {
+    school?: string,
+    degree?: string,
+    field_of_study?: string,
+    description?: string
+  }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/educations/${eid}/`, educationData).pipe(
+      tap((updatedEducation) => {
+        const currentEducations = this.educationsSubject.value;
+        const updatedEducations = currentEducations.map(edu => 
+          edu.eid === eid ? updatedEducation : edu
+        );
+        this.educationsSubject.next(updatedEducations);
+      }),
+      catchError((error) => {
+        console.error('Error updating education:', error);
+        this.showAlert('Update Error', 'Failed to update education record');
+        return throwError(() => new Error(error));
+      })
+    );
+  }
+
+  /**
+   * Delete education record
+   * @param eid Education ID
+   */
+  deleteEducation(eid: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/educations/delete/${eid}/`).pipe(
+      tap(() => {
+        const updatedEducations = this.educationsSubject.value.filter(
+          edu => edu.eid !== eid
+        );
+        this.educationsSubject.next(updatedEducations);
+      }),
+      catchError((error) => {
+        console.error('Error deleting education:', error);
+        this.showAlert('Delete Error', 'Failed to delete education record');
+        return throwError(() => new Error(error));
+      })
+    );
+  }
+
   /**
    * Helper method to show alert messages
    * @param header Alert header
@@ -124,13 +234,5 @@ export class ProfileService {
       buttons: ['OK']
     });
     await alert.present();
-  }
-
-  getAboutMe(uid: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/api/about-me/?uid=${uid}`);
-  }
-  
-  saveAboutMe(data: {uid: string, about: string}): Observable<any> {
-    return this.http.post(`${this.apiUrl}/api/about-me/`, data);
   }
 }

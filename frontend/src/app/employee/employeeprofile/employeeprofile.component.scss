@@ -206,7 +206,7 @@
   }
 }
 
-/* Second Container Styles */
+/* Job Position Container Styles */
 .job-position-container {
   margin-top: 30px;
   
@@ -273,125 +273,6 @@
   }
 }
 
-/* Modal Styles */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-}
-
-.add-position-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  max-width: 400px;
-  background: white;
-  border-radius: 12px;
-  z-index: 1001;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #eee;
-    
-    h3 {
-      margin: 0;
-      font-size: 1.2rem;
-      color: #333;
-    }
-    
-    ion-icon {
-      font-size: 1.5rem;
-      color: #666;
-      cursor: pointer;
-    }
-  }
-  
-  .modal-content {
-    padding: 20px;
-    
-    ion-item {
-      --padding-start: 0;
-      --inner-padding-end: 0;
-      --border-color: #e0e0e0;
-      margin-bottom: 15px;
-      
-      ion-select {
-        width: 100%;
-      }
-    }
-  }
-  
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    padding: 15px 20px;
-    border-top: 1px solid #eee;
-    
-    ion-button {
-      margin-left: 10px;
-      --border-radius: 6px;
-      --padding-start: 20px;
-      --padding-end: 20px;
-    }
-  }
-}
-
-/* About Me Section */
-// .about-me-container {
-//   margin-top: 30px;
-  
-//   .about-me-content {
-//     padding: 15px;
-    
-//     .about-me-view {
-//       .about-me-text {
-//         white-space: pre-line;
-//         line-height: 1.6;
-//         color: #333;
-//         margin-bottom: 20px;
-//       }
-//     }
-    
-//     .about-me-edit {
-//       .about-me-textarea {
-//         background: #f8f9fa;
-//         border-radius: 8px;
-//         padding: 12px;
-//         margin-bottom: 20px;
-//         --highlight-color-focused: #9b59b6;
-        
-//         textarea {
-//           min-height: 150px;
-//         }
-//       }
-//     }
-    
-//     .action-buttons {
-//       display: flex;
-//       gap: 10px;
-//       margin-top: 15px;
-      
-//       ion-button {
-//         flex: 1;
-//         --border-radius: 8px;
-//         --padding-top: 15px;
-//         --padding-bottom: 15px;
-//         font-weight: 500;
-//       }
-//     }
-//   }
-// }
-
 /* About Me Section */
 .about-me-container {
   margin-top: 30px;
@@ -410,8 +291,8 @@
     
     .about-me-edit {
       ion-textarea {
-        --color: #000000; /* Black text */
-        color: #000000; /* Fallback */
+        --color: #000000;
+        color: #000000;
         background: #f8f9fa;
         border-radius: 8px;
         padding: 12px;
@@ -419,7 +300,6 @@
         --highlight-color-focused: #9b59b6;
       }
 
-      /* Force black text in the textarea */
       ion-textarea .native-textarea {
         color: #000000 !important;
       }
@@ -439,4 +319,322 @@
       }
     }
   }
+}
+
+/* Education Section */
+.education-container {
+  margin-top: 30px;
+  
+  .education-content {
+    padding: 15px;
+    
+    .empty-state {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+    
+    .education-list {
+      margin-bottom: 20px;
+      
+      .education-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        .education-view {
+          .education-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            
+            .education-icon {
+              margin-right: 12px;
+              color: #9b59b6;
+              font-size: 18px;
+            }
+            
+            .education-degree {
+              flex: 1;
+              margin: 0;
+              font-size: 1rem;
+              font-weight: 600;
+              color: #333;
+            }
+            
+            .edit-icon, .delete-icon {
+              font-size: 18px;
+              margin-left: 10px;
+              padding: 5px;
+              cursor: pointer;
+            }
+            
+            .edit-icon {
+              color: #3498db;
+            }
+            
+            .delete-icon {
+              color: #e74c3c;
+            }
+          }
+          
+          .education-details {
+            .education-school {
+              font-weight: 500;
+              color: #555;
+              margin-bottom: 5px;
+            }
+            
+            .education-description {
+              color: #666;
+              line-height: 1.5;
+              margin-bottom: 10px;
+            }
+            
+            .education-dates {
+              font-size: 0.8rem;
+              color: #888;
+              font-style: italic;
+            }
+          }
+        }
+        
+        .education-edit {
+          ion-item {
+            --background: transparent;
+            --border-color: #e0e0e0;
+            --padding-start: 0;
+            --inner-padding-end: 0;
+            margin-bottom: 15px;
+            
+            &:last-child {
+              margin-bottom: 20px;
+            }
+          }
+          
+          .education-edit-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            
+            ion-button {
+              --border-radius: 6px;
+              --padding-start: 20px;
+              --padding-end: 20px;
+            }
+          }
+        }
+      }
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      
+      ion-button {
+        flex: 1;
+        --border-radius: 8px;
+        --padding-top: 15px;
+        --padding-bottom: 15px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+/* Education Modal */
+.add-education-modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  z-index: 1001;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    ion-icon {
+      font-size: 1.5rem;
+      color: #666;
+      cursor: pointer;
+    }
+  }
+  
+  .modal-content {
+    ion-item {
+      --background: transparent;
+      --border-color: #e0e0e0;
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      margin-bottom: 15px;
+      
+      ion-label {
+        color: #555;
+        font-weight: 500;
+      }
+      
+      ion-input, ion-textarea {
+        --color: #333;
+      }
+      
+      ion-select {
+        width: 100%;
+        color: black;
+      }
+    }
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    
+    ion-button {
+      --border-radius: 6px;
+      --padding-start: 20px;
+      --padding-end: 20px;
+    }
+  }
+}
+
+/* Position Modal (keep existing but ensure consistency) */
+.add-position-modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  z-index: 1001;
+  max-height: 50vh;
+  overflow-y: auto;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    ion-icon {
+      font-size: 1.5rem;
+      color: #666;
+      cursor: pointer;
+    }
+  }
+  
+  .modal-content {
+    ion-item {
+      --background: transparent;
+      --border-color: #e0e0e0;
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      margin-bottom: 15px;
+    }
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    
+    ion-button {
+      --border-radius: 6px;
+      --padding-start: 20px;
+      --padding-end: 20px;
+    }
+  }
+}
+
+/* Animation for modals */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* General Styles */
+ion-card {
+  margin: 16px;
+}
+
+.empty-message {
+  color: var(--ion-color-medium);
+  font-style: italic;
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.add-form, .edit-form {
+  padding: 16px;
+  border: 1px solid var(--ion-color-light);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 16px;
+}
+
+ion-button {
+  margin-top: 8px;
 }

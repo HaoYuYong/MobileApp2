@@ -23,7 +23,9 @@ import {
   addCircleOutline,
   removeCircleOutline,
   createOutline,
-  saveOutline
+  saveOutline,
+  schoolOutline,
+  school
 } from 'ionicons/icons';
 
 @Component({
@@ -53,6 +55,19 @@ export class EmployeeprofileComponent implements OnInit {
   isAboutMeEditMode: boolean = false;
   tempAboutMe: string = '';
   
+  // Education properties
+  educations: any[] = [];
+  isLoadingEducations = false;
+  isEditingEducation = false;
+  showAddEducationModal = false;
+  educationModalData: any = {
+    school: '',
+    degree: '',
+    field_of_study: '',
+    description: ''
+  };
+  currentlyEditingEducationId: number | null = null;
+  
   positionOptions = [
     'Engineer', 'Doctor', 'Accounting', 'Marketing', 'Part Timer', 
     'Event Crew', 'Software Engineer', 'Data Analyst', 'Product Manager',
@@ -61,6 +76,14 @@ export class EmployeeprofileComponent implements OnInit {
     'Full Stack Developer', 'Mobile Developer', 'Data Scientist',
     'Machine Learning Engineer', 'Cloud Architect', 'Network Engineer',
     'Security Specialist'
+  ];
+
+  degreeOptions = [
+    { value: 'High School', label: 'High School' },
+    { value: 'Bachelor', label: 'Bachelor\'s' },
+    { value: 'Master', label: 'Master\'s' },
+    { value: 'PhD', label: 'PhD' },
+    { value: 'Other', label: 'Other' }
   ];
 
   constructor(
@@ -85,12 +108,13 @@ export class EmployeeprofileComponent implements OnInit {
       'add-circle-outline': addCircleOutline,
       'remove-circle-outline': removeCircleOutline,
       'create-outline': createOutline,
-      'save-outline': saveOutline
+      'save-outline': saveOutline,
+      school,
+      'school-outline': schoolOutline
     });
   }
 
   ngOnInit() {
-    // Add debug logging
     console.log('Component initialized');
     
     const userData = sessionStorage.getItem('currentUser');
@@ -108,6 +132,7 @@ export class EmployeeprofileComponent implements OnInit {
           this.isLoading = false;
           this.loadJobPositions(user.uid);
           this.loadAboutMe(user.uid);
+          this.loadEducations(user.uid);
         },
         error: (err) => {
           console.error('Error loading profile:', err);
@@ -140,7 +165,6 @@ export class EmployeeprofileComponent implements OnInit {
       error: (error) => {
         console.error('Error loading job positions:', error);
         this.isLoadingPositions = false;
-        // Don't show alert for 404 (no positions yet)
         if (error.status !== 404) {
           this.showAlert('Error', 'Failed to load job positions');
         } else {
@@ -166,6 +190,159 @@ export class EmployeeprofileComponent implements OnInit {
         }
       }
     });
+  }
+
+  // Education methods
+  loadEducations(uid: string) {
+    console.log('Loading educations for uid:', uid);
+    this.isLoadingEducations = true;
+    
+    this.http.get(`${this.apiUrl}/api/educations/user/${uid}/`).subscribe({
+      next: (data: any) => {
+        console.log('Educations loaded:', data);
+        this.educations = data;
+        this.isLoadingEducations = false;
+      },
+      error: (error) => {
+        console.error('Error loading educations:', error);
+        this.isLoadingEducations = false;
+        if (error.status !== 404) {
+          this.showAlert('Error', 'Failed to load education history');
+        } else {
+          this.educations = [];
+        }
+      }
+    });
+  }
+
+  // Education modal methods
+  openAddEducationModal() {
+    this.educationModalData = {
+      school: '',
+      degree: '',
+      field_of_study: '',
+      description: ''
+    };
+    this.showAddEducationModal = true;
+  }
+
+  closeAddEducationModal() {
+    this.showAddEducationModal = false;
+  }
+
+  saveEducation() {
+    const userData = sessionStorage.getItem('currentUser');
+    if (!userData) {
+      this.showAlert('Error', 'User not logged in');
+      return;
+    }
+
+    const user = JSON.parse(userData);
+    const formData = {
+      uid: user.uid,
+      ...this.educationModalData
+    };
+
+    // Validate required fields
+    if (!formData.school || !formData.degree || !formData.field_of_study) {
+      this.showAlert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    this.http.post(`${this.apiUrl}/api/educations/add/`, formData).subscribe({
+      next: (response: any) => {
+        this.showAddEducationModal = false;
+        this.loadEducations(user.uid);
+        this.showAlert('Success', 'Education added successfully');
+      },
+      error: (error) => {
+        console.error('Error adding education:', error);
+        this.showAlert('Error', 'Failed to add education');
+      }
+    });
+  }
+
+  toggleEditEducationMode() {
+    this.isEditingEducation = !this.isEditingEducation;
+    if (!this.isEditingEducation) {
+      this.currentlyEditingEducationId = null;
+    }
+  }
+
+  editEducation(education: any) {
+    this.currentlyEditingEducationId = education.eid;
+    this.educationModalData = {
+      school: education.school,
+      degree: education.degree,
+      field_of_study: education.field_of_study,
+      description: education.description
+    };
+    this.showAddEducationModal = true;
+  }
+
+  updateEducation() {
+    if (!this.currentlyEditingEducationId) return;
+
+    const formData = {
+      ...this.educationModalData
+    };
+
+    // Validate required fields
+    if (!formData.school || !formData.degree || !formData.field_of_study) {
+      this.showAlert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    this.http.put(`${this.apiUrl}/api/educations/update/${this.currentlyEditingEducationId}/`, formData).subscribe({
+      next: (response: any) => {
+        this.showAddEducationModal = false;
+        this.currentlyEditingEducationId = null;
+        const userData = sessionStorage.getItem('currentUser');
+        if (userData) {
+          const user = JSON.parse(userData);
+          this.loadEducations(user.uid);
+        }
+        this.showAlert('Success', 'Education updated successfully');
+      },
+      error: (error) => {
+        console.error('Error updating education:', error);
+        this.showAlert('Error', 'Failed to update education');
+      }
+    });
+  }
+
+  async deleteEducation(eid: number) {
+    const alert = await this.alertController.create({
+      header: 'Confirm Delete',
+      message: 'Are you sure you want to delete this education record?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Delete',
+          handler: () => {
+            this.http.delete(`${this.apiUrl}/api/educations/delete/${eid}/`).subscribe({
+              next: () => {
+                const userData = sessionStorage.getItem('currentUser');
+                if (userData) {
+                  const user = JSON.parse(userData);
+                  this.loadEducations(user.uid);
+                }
+                this.showAlert('Success', 'Education deleted successfully');
+              },
+              error: (error) => {
+                console.error('Error deleting education:', error);
+                this.showAlert('Error', 'Failed to delete education');
+              }
+            });
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   enterAboutMeEditMode() {
@@ -236,7 +413,7 @@ export class EmployeeprofileComponent implements OnInit {
     
     this.http.post(`${this.apiUrl}/api/job-positions/`, positionData).subscribe({
       next: (response: any) => {
-        this.loadJobPositions(user.uid); // Refresh the list
+        this.loadJobPositions(user.uid);
         this.closeAddPositionModal();
       },
       error: async (error) => {
@@ -267,7 +444,7 @@ export class EmployeeprofileComponent implements OnInit {
                 const userData = sessionStorage.getItem('currentUser');
                 if (userData) {
                   const user = JSON.parse(userData);
-                  this.loadJobPositions(user.uid); // Refresh the list
+                  this.loadJobPositions(user.uid);
                 }
               },
               error: async (error) => {

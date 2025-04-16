@@ -67,6 +67,17 @@ export class EmployeeprofileComponent implements OnInit {
     description: ''
   };
   currentlyEditingEducationId: number | null = null;
+
+  // Work Experience properties
+  workExperiences: any[] = [];
+  isLoadingExperiences = false;
+  isEditingExperience = false;
+  showAddExperienceModal = false;
+  experienceModalData: any = {
+    title: '',
+    description: ''
+  };
+  currentlyEditingExperienceId: number | null = null;
   
   positionOptions = [
     'Engineer', 'Doctor', 'Accounting', 'Marketing', 'Part Timer', 
@@ -133,6 +144,7 @@ export class EmployeeprofileComponent implements OnInit {
           this.loadJobPositions(user.uid);
           this.loadAboutMe(user.uid);
           this.loadEducations(user.uid);
+          this.loadWorkExperiences(user.uid);
         },
         error: (err) => {
           console.error('Error loading profile:', err);
@@ -468,4 +480,158 @@ export class EmployeeprofileComponent implements OnInit {
     });
     await alert.present();
   }
+
+  // Work Experience methods
+loadWorkExperiences(uid: string) {
+  console.log('Loading work experiences for uid:', uid);
+  this.isLoadingExperiences = true;
+  
+  this.http.get(`${this.apiUrl}/api/work-experiences/user/${uid}/`).subscribe({
+    next: (data: any) => {
+      console.log('Work experiences loaded:', data);
+      this.workExperiences = data;
+      this.isLoadingExperiences = false;
+    },
+    error: (error) => {
+      console.error('Error loading work experiences:', error);
+      this.isLoadingExperiences = false;
+      if (error.status !== 404) {
+        this.showAlert('Error', 'Failed to load work experience');
+      } else {
+        this.workExperiences = [];
+      }
+    }
+  });
+}
+
+// Work Experience modal methods
+openAddExperienceModal() {
+  this.experienceModalData = {
+    title: '',
+    description: ''
+  };
+  this.showAddExperienceModal = true;
+}
+
+closeAddExperienceModal() {
+  this.showAddExperienceModal = false;
+}
+
+saveExperience() {
+  const userData = sessionStorage.getItem('currentUser');
+  if (!userData) {
+    this.showAlert('Error', 'User not logged in');
+    return;
+  }
+
+  const user = JSON.parse(userData);
+  const formData = {
+    uid: user.uid,
+    ...this.experienceModalData
+  };
+
+  // Validate required fields
+  if (!formData.title) {
+    this.showAlert('Error', 'Please fill in the title field');
+    return;
+  }
+
+  this.http.post(`${this.apiUrl}/api/work-experiences/add/`, formData).subscribe({
+    next: (response: any) => {
+      this.showAddExperienceModal = false;
+      this.loadWorkExperiences(user.uid);
+      this.showAlert('Success', 'Work experience added successfully');
+    },
+    error: (error) => {
+      console.error('Error adding work experience:', error);
+      this.showAlert('Error', 'Failed to add work experience');
+    }
+  });
+}
+
+toggleEditExperienceMode() {
+  this.isEditingExperience = !this.isEditingExperience;
+  if (!this.isEditingExperience) {
+    this.currentlyEditingExperienceId = null;
+  }
+}
+
+editExperience(experience: any) {
+  this.currentlyEditingExperienceId = experience.wid;
+  this.experienceModalData = {
+    title: experience.title,
+    description: experience.description
+  };
+  this.showAddExperienceModal = true;
+}
+
+updateExperience() {
+  if (!this.currentlyEditingExperienceId) return;
+
+  const formData = {
+    ...this.experienceModalData
+  };
+
+  // Validate required fields
+  if (!formData.title) {
+    this.showAlert('Error', 'Please fill in the title field');
+    return;
+  }
+
+  this.http.put(`${this.apiUrl}/api/work-experiences/update/${this.currentlyEditingExperienceId}/`, formData).subscribe({
+    next: (response: any) => {
+      this.showAddExperienceModal = false;
+      this.currentlyEditingExperienceId = null;
+      const userData = sessionStorage.getItem('currentUser');
+      if (userData) {
+        const user = JSON.parse(userData);
+        this.loadWorkExperiences(user.uid);
+      }
+      this.showAlert('Success', 'Work experience updated successfully');
+    },
+    error: (error) => {
+      console.error('Error updating work experience:', error);
+      this.showAlert('Error', 'Failed to update work experience');
+    }
+  });
+}
+
+async deleteWorkExperience(wid: number) {
+  const alert = await this.alertController.create({
+    header: 'Confirm Delete',
+    message: 'Are you sure you want to delete this work experience?',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel',
+        cssClass: 'secondary'
+      },
+      {
+        text: 'Delete',
+        cssClass: 'danger',
+        handler: () => {
+          setTimeout(() => {
+            this.http.delete(`${this.apiUrl}/api/work-experiences/delete/${wid}/`).subscribe({
+              next: () => {
+                const userData = sessionStorage.getItem('currentUser');
+                if (userData) {
+                  const user = JSON.parse(userData);
+                  this.loadWorkExperiences(user.uid);
+                }
+              },
+              error: (error) => {
+                console.error('Error deleting work experience:', error);
+                this.showAlert('Error', 'Failed to delete work experience');
+              }
+            });
+          }, 100);
+          return true;
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+}
+
 }

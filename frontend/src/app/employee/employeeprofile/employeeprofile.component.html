@@ -270,4 +270,97 @@
       </ion-button>
     </div>
   </div>
+
+
+
+  <!-- Fifth Container - Work Experience -->
+  <div class="container work-experience-container">
+    <div class="title">Work Experience</div>
+    
+    <div class="work-experience-content">
+      <!-- Loading state -->
+      <div *ngIf="isLoadingExperiences" class="loading-spinner">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="!isLoadingExperiences && workExperiences.length === 0" class="empty-state">
+        <p>Add your past working experience in this section</p>
+      </div>
+      
+      <!-- Work Experience list -->
+      <div *ngIf="!isLoadingExperiences && workExperiences.length > 0" class="work-experience-list">
+        <div *ngFor="let exp of workExperiences" class="work-experience-item">
+          <div class="work-experience-view">
+            <div class="work-experience-header">
+              <ion-icon name="briefcase-outline" class="work-experience-icon"></ion-icon>
+              <h3 class="work-experience-title">{{ exp.title }}</h3>
+              <ion-icon *ngIf="isEditingExperience" name="create-outline" class="edit-icon" 
+                      (click)="editExperience(exp)"></ion-icon>
+              <ion-icon *ngIf="isEditingExperience" name="trash-outline" class="delete-icon" 
+                      (click)="deleteWorkExperience(exp.wid)"></ion-icon>
+            </div>
+            <div class="work-experience-details">
+              <p class="work-experience-description" *ngIf="exp.description">{{ exp.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Action buttons -->
+      <div class="action-buttons">
+        <!-- Add button -->
+        <ion-button *ngIf="!isEditingExperience"
+                  expand="block" (click)="openAddExperienceModal()">
+          <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+          Add Experience
+        </ion-button>
+        
+        <!-- Edit button -->
+        <ion-button *ngIf="workExperiences.length > 0 && !isEditingExperience"
+                  expand="block" fill="outline" color="medium" (click)="toggleEditExperienceMode()">
+          <ion-icon slot="start" name="create-outline"></ion-icon>
+          Edit
+        </ion-button>
+        
+        <!-- Cancel edit button -->
+        <ion-button *ngIf="isEditingExperience"
+                  expand="block" fill="outline" color="danger" (click)="toggleEditExperienceMode()">
+          <ion-icon slot="start" name="close-outline"></ion-icon>
+          Cancel Edit
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Experience Modal -->
+  <div class="modal-backdrop" *ngIf="showAddExperienceModal" (click)="closeAddExperienceModal()"></div>
+
+  <div class="add-experience-modal" *ngIf="showAddExperienceModal">
+    <div class="modal-header">
+      <h3>{{ currentlyEditingExperienceId ? 'Edit Work Experience' : 'Add Work Experience' }}</h3>
+      <ion-icon name="close-outline" (click)="closeAddExperienceModal()"></ion-icon>
+    </div>
+    
+    <div class="modal-content">
+      <ion-item>
+        <ion-label position="stacked">Job Title</ion-label>
+        <ion-input [(ngModel)]="experienceModalData.title" placeholder="e.g. Software Engineer"></ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Description</ion-label>
+        <ion-textarea [(ngModel)]="experienceModalData.description" rows="5" 
+                    placeholder="Describe your responsibilities and achievements in this role"></ion-textarea>
+      </ion-item>
+    </div>
+    
+    <div class="modal-footer">
+      <ion-button fill="outline" (click)="closeAddExperienceModal()">Cancel</ion-button>
+      <ion-button fill="solid" (click)="currentlyEditingExperienceId ? updateExperience() : saveExperience()" 
+                [disabled]="!experienceModalData.title">
+        {{ currentlyEditingExperienceId ? 'Save Changes' : 'Save' }}
+      </ion-button>
+    </div>
+  </div>
 </ion-content>

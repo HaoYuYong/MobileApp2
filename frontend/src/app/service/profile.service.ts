@@ -235,4 +235,70 @@ export class ProfileService {
     });
     await alert.present();
   }
+
+  // Work Experience Methods
+  /**
+   * Fetch work experience records for user
+   * @param uid User ID
+   */
+  getWorkExperiences(uid: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/work-experiences/${uid}/`).pipe(
+      catchError((error) => {
+        console.error('Error fetching work experiences:', error);
+        this.showAlert('Work Experience Error', 'Failed to load work experience');
+        return throwError(() => new Error(error));
+      })
+    );
+  }
+
+  /**
+   * Add new work experience record
+   * @param experienceData {uid: string, title: string, description?: string}
+   */
+  addWorkExperience(experienceData: {
+    uid: string,
+    title: string,
+    description?: string
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/work-experiences/`, experienceData).pipe(
+      catchError((error) => {
+        console.error('Error adding work experience:', error);
+        this.showAlert('Add Experience Error', error.error?.message || 'Failed to add work experience');
+        return throwError(() => new Error(error));
+      })
+    );
+  }
+
+  /**
+   * Update existing work experience record
+   * @param wid Work Experience ID
+   * @param experienceData {title?: string, description?: string}
+   */
+  updateWorkExperience(wid: number, experienceData: {
+    title?: string,
+    description?: string
+  }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/work-experiences/${wid}/`, experienceData).pipe(
+      catchError((error) => {
+        console.error('Error updating work experience:', error);
+        this.showAlert('Update Error', 'Failed to update work experience');
+        return throwError(() => new Error(error));
+      })
+    );
+  }
+
+  /**
+   * Delete work experience record
+   * @param wid Work Experience ID
+   */
+  deleteWorkExperience(wid: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/work-experiences/delete/${wid}/`).pipe(
+      catchError((error) => {
+        console.error('Error deleting work experience:', error);
+        this.showAlert('Delete Error', 'Failed to delete work experience');
+        return throwError(() => new Error(error));
+      })
+    );
+  }
 }
+

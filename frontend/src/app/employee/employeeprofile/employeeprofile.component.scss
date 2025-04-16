@@ -638,3 +638,164 @@ ion-item {
 ion-button {
   margin-top: 8px;
 }
+
+/* Work Experience Section */
+.work-experience-container {
+  margin-top: 30px;
+  
+  .work-experience-content {
+    padding: 15px;
+    
+    .empty-state {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+    
+    .work-experience-list {
+      margin-bottom: 20px;
+      
+      .work-experience-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        .work-experience-view {
+          .work-experience-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            
+            .work-experience-icon {
+              margin-right: 12px;
+              color: #9b59b6;
+              font-size: 18px;
+            }
+            
+            .work-experience-title {
+              flex: 1;
+              margin: 0;
+              font-size: 1rem;
+              font-weight: 600;
+              color: #333;
+            }
+            
+            .edit-icon, .delete-icon {
+              font-size: 18px;
+              margin-left: 10px;
+              padding: 5px;
+              cursor: pointer;
+            }
+            
+            .edit-icon {
+              color: #3498db;
+            }
+            
+            .delete-icon {
+              color: #e74c3c;
+            }
+          }
+          
+          .work-experience-details {
+            .work-experience-description {
+              color: #666;
+              line-height: 1.5;
+              margin-bottom: 10px;
+              white-space: pre-line;
+            }
+          }
+        }
+      }
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      
+      ion-button {
+        flex: 1;
+        --border-radius: 8px;
+        --padding-top: 15px;
+        --padding-bottom: 15px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+/* Experience Modal */
+.add-experience-modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  z-index: 1001;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    ion-icon {
+      font-size: 1.5rem;
+      color: #666;
+      cursor: pointer;
+    }
+  }
+  
+  .modal-content {
+    ion-item {
+      --background: transparent;
+      --border-color: #e0e0e0;
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      margin-bottom: 15px;
+      
+      ion-label {
+        color: #555;
+        font-weight: 500;
+      }
+      
+      ion-input, ion-textarea {
+        --color: #333;
+      }
+    }
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    
+    ion-button {
+      --border-radius: 6px;
+      --padding-start: 20px;
+      --padding-end: 20px;
+    }
+  }
+}

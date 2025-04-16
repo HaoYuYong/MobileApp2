@@ -90,7 +90,7 @@ class User(models.Model):
     def __str__(self):
         return f"{self.uid} - {self.name} ({self.role})"
     
-
+# Job Position Database table
 class JobPosition(models.Model):
     POSITION_CHOICES = [
         ('Engineer', 'Engineer'),
@@ -206,3 +206,27 @@ class Education(models.Model):
 
     def __str__(self):
         return f"{self.degree} at {self.school} ({self.user.uid})"  
+    
+# Work Experience Database table
+class WorkExperience(models.Model):
+    wid = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='work_experiences',
+        db_column='uid',
+        to_field='uid'
+    )
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'work_experience'
+        verbose_name = 'Work Experience'
+        verbose_name_plural = 'Work Experiences'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.user.uid})"

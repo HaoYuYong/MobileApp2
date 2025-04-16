@@ -2,7 +2,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
-from .models import User, JobPosition, AboutMe, Education
+from .models import User, JobPosition, AboutMe, Education, WorkExperience
 from django.views.decorators.http import require_http_methods
 import sqlite3
 from django.db import connection
@@ -383,5 +383,124 @@ def education_handler(request, uid=None, eid=None):
         return update_education(request, eid)
     elif request.method == 'DELETE' and eid:
         return delete_education(request, eid)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+
+# Add these to views.py
+
+# Work Experience Views
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_work_experiences(request, uid):
+    try:
+        experiences = WorkExperience.objects.filter(user__uid=uid).order_by('-created_at')
+        data = [{
+            'wid': experience.wid,
+            'title': experience.title,
+            'description': experience.description,
+            'created_at': experience.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'updated_at': experience.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+        } for experience in experiences]
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_work_experience(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Validate required fields
+        required_fields = ['uid', 'title']
+        if not all(field in data for field in required_fields):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        # Check if user exists
+        try:
+            user = User.objects.get(uid=data['uid'])
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        
+        # Create work experience record
+        experience = WorkExperience.objects.create(
+            user=user,
+            title=data['title'],
+            description=data.get('description', '')
+        )
+        
+        return JsonResponse({
+            'wid': experience.wid,
+            'message': 'Work experience added successfully',
+            'experience': {
+                'wid': experience.wid,
+                'title': experience.title,
+                'description': experience.description,
+                'created_at': experience.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'updated_at': experience.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+        }, status=201)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["PUT"])
+def update_work_experience(request, wid):
+    try:
+        data = json.loads(request.body)
+        
+        try:
+            experience = WorkExperience.objects.get(wid=wid)
+        except WorkExperience.DoesNotExist:
+            return JsonResponse({'error': 'Work experience not found'}, status=404)
+        
+        # Update fields if they exist in the request
+        if 'title' in data:
+            experience.title = data['title']
+        if 'description' in data:
+            experience.description = data['description']
+        
+        experience.save()
+        
+        return JsonResponse({
+            'message': 'Work experience updated successfully',
+            'experience': {
+                'wid': experience.wid,
+                'title': experience.title,
+                'description': experience.description,
+                'created_at': experience.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'updated_at': experience.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+        }, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_work_experience(request, wid):
+    try:
+        experience = WorkExperience.objects.get(wid=wid)
+        experience.delete()
+        return JsonResponse({'message': 'Work experience deleted successfully'}, status=200)
+    except WorkExperience.DoesNotExist:
+        return JsonResponse({'error': 'Work experience not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def work_experience_handler(request, uid=None, wid=None):
+    if request.method == 'GET' and uid:
+        return get_work_experiences(request, uid)
+    elif request.method == 'POST':
+        return add_work_experience(request)
+    elif request.method == 'PUT' and wid:
+        return update_work_experience(request, wid)
+    elif request.method == 'DELETE' and wid:
+        return delete_work_experience(request, wid)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)

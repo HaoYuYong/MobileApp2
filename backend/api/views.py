@@ -2,7 +2,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
-from .models import User, JobPosition, AboutMe, Education, WorkExperience
+from .models import User, JobPosition, AboutMe, Education, WorkExperience, Skills
 from django.views.decorators.http import require_http_methods
 import sqlite3
 from django.db import connection
@@ -385,9 +385,6 @@ def education_handler(request, uid=None, eid=None):
         return delete_education(request, eid)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
-    
-
-# Add these to views.py
 
 # Work Experience Views
 @csrf_exempt
@@ -502,5 +499,115 @@ def work_experience_handler(request, uid=None, wid=None):
         return update_work_experience(request, wid)
     elif request.method == 'DELETE' and wid:
         return delete_work_experience(request, wid)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+# Skills Views
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_skills(request, uid):
+    try:
+        skills = Skills.objects.filter(user__uid=uid).order_by('-created_at')
+        data = [{
+            'sid': skill.sid,
+            'skill': skill.skill,
+            'created_at': skill.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'updated_at': skill.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+        } for skill in skills]
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_skill(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Validate required fields
+        required_fields = ['uid', 'skill']
+        if not all(field in data for field in required_fields):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        # Check if user exists
+        try:
+            user = User.objects.get(uid=data['uid'])
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        
+        # Create skill record
+        skill = Skills.objects.create(
+            user=user,
+            skill=data['skill']
+        )
+        
+        return JsonResponse({
+            'sid': skill.sid,
+            'message': 'Skill added successfully',
+            'skill': {
+                'sid': skill.sid,
+                'skill': skill.skill,
+                'created_at': skill.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'updated_at': skill.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+        }, status=201)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["PUT"])
+def update_skill(request, sid):
+    try:
+        data = json.loads(request.body)
+        
+        try:
+            skill = Skills.objects.get(sid=sid)
+        except Skills.DoesNotExist:
+            return JsonResponse({'error': 'Skill not found'}, status=404)
+        
+        # Update fields if they exist in the request
+        if 'skill' in data:
+            skill.skill = data['skill']
+        
+        skill.save()
+        
+        return JsonResponse({
+            'message': 'Skill updated successfully',
+            'skill': {
+                'sid': skill.sid,
+                'skill': skill.skill,
+                'created_at': skill.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'updated_at': skill.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+        }, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_skill(request, sid):
+    try:
+        skill = Skills.objects.get(sid=sid)
+        skill.delete()
+        return JsonResponse({'message': 'Skill deleted successfully'}, status=200)
+    except Skills.DoesNotExist:
+        return JsonResponse({'error': 'Skill not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def skills_handler(request, uid=None, sid=None):
+    if request.method == 'GET' and uid:
+        return get_skills(request, uid)
+    elif request.method == 'POST':
+        return add_skill(request)
+    elif request.method == 'PUT' and sid:
+        return update_skill(request, sid)
+    elif request.method == 'DELETE' and sid:
+        return delete_skill(request, sid)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)

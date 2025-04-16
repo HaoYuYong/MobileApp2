@@ -363,4 +363,86 @@
       </ion-button>
     </div>
   </div>
+
+  <!-- Sixth Container - Skills -->
+  <div class="container skills-container">
+    <div class="title">Skills</div>
+    
+    <div class="skills-content">
+      <!-- Loading state -->
+      <div *ngIf="isLoadingSkills" class="loading-spinner">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="!isLoadingSkills && skills.length === 0" class="empty-state">
+        <p>No skills added yet.</p>
+      </div>
+      
+      <!-- Skills list -->
+      <div *ngIf="!isLoadingSkills && skills.length > 0" class="skills-list">
+        <div *ngFor="let skill of skills" class="skill-item">
+          <div class="skill-view">
+            <div class="skill-header">
+              <ion-icon name="construct-outline" class="skill-icon"></ion-icon>
+              <span class="skill-text">{{ skill.skill }}</span>
+              <ion-icon *ngIf="isEditingSkills" name="create-outline" class="edit-icon" 
+                      (click)="editSkill(skill)"></ion-icon>
+              <ion-icon *ngIf="isEditingSkills" name="trash-outline" class="delete-icon" 
+                      (click)="deleteSkill(skill.sid)"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Action buttons -->
+      <div class="action-buttons">
+        <!-- Add button -->
+        <ion-button *ngIf="!isEditingSkills"
+                  expand="block" (click)="openAddSkillModal()">
+          <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+          Add Skill
+        </ion-button>
+        
+        <!-- Edit button -->
+        <ion-button *ngIf="skills.length > 0 && !isEditingSkills"
+                  expand="block" fill="outline" color="medium" (click)="toggleEditSkillsMode()">
+          <ion-icon slot="start" name="create-outline"></ion-icon>
+          Edit
+        </ion-button>
+        
+        <!-- Cancel edit button -->
+        <ion-button *ngIf="isEditingSkills"
+                  expand="block" fill="outline" color="danger" (click)="toggleEditSkillsMode()">
+          <ion-icon slot="start" name="close-outline"></ion-icon>
+          Cancel Edit
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Skill Modal -->
+  <div class="modal-backdrop" *ngIf="showAddSkillModal" (click)="closeAddSkillModal()"></div>
+
+  <div class="add-skill-modal" *ngIf="showAddSkillModal">
+    <div class="modal-header">
+      <h3>{{ currentlyEditingSkillId ? 'Edit Skill' : 'Add Skill' }}</h3>
+      <ion-icon name="close-outline" (click)="closeAddSkillModal()"></ion-icon>
+    </div>
+    
+    <div class="modal-content">
+      <ion-item>
+        <ion-label position="stacked">Skill</ion-label>
+        <ion-input [(ngModel)]="skillModalData.skill" placeholder="e.g. JavaScript, Python, etc."></ion-input>
+      </ion-item>
+    </div>
+    
+    <div class="modal-footer">
+      <ion-button fill="outline" (click)="closeAddSkillModal()">Cancel</ion-button>
+      <ion-button fill="solid" (click)="currentlyEditingSkillId ? updateSkill() : saveSkill()" 
+                [disabled]="!skillModalData.skill">
+        {{ currentlyEditingSkillId ? 'Save Changes' : 'Save' }}
+      </ion-button>
+    </div>
+  </div>
 </ion-content>

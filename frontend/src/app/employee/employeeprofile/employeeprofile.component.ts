@@ -25,7 +25,8 @@ import {
   createOutline,
   saveOutline,
   schoolOutline,
-  school
+  school,
+  constructOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -78,6 +79,16 @@ export class EmployeeprofileComponent implements OnInit {
     description: ''
   };
   currentlyEditingExperienceId: number | null = null;
+
+  // Add these properties to the component class
+  skills: any[] = [];
+  isLoadingSkills = false;
+  isEditingSkills = false;
+  showAddSkillModal = false;
+  skillModalData: any = {
+    skill: ''
+  };
+  currentlyEditingSkillId: number | null = null;
   
   positionOptions = [
     'Engineer', 'Doctor', 'Accounting', 'Marketing', 'Part Timer', 
@@ -105,23 +116,20 @@ export class EmployeeprofileComponent implements OnInit {
     // Register both outline and non-outline versions of icons
     addIcons({
       add,
-      'add-outline': addOutline,
-      briefcase,
-      'briefcase-outline': briefcaseOutline,
-      close,
+      'add-outline': addOutline, briefcase,
+      'briefcase-outline': briefcaseOutline, close,
       'close-outline': closeOutline,
       'chevron-down': chevronDown,
       'chevron-down-outline': chevronDownOutline,
       'chevron-up': chevronUp,
-      'chevron-up-outline': chevronUpOutline,
-      trash,
+      'chevron-up-outline': chevronUpOutline, trash,
       'trash-outline': trashOutline,
       'add-circle-outline': addCircleOutline,
       'remove-circle-outline': removeCircleOutline,
       'create-outline': createOutline,
-      'save-outline': saveOutline,
-      school,
-      'school-outline': schoolOutline
+      'save-outline': saveOutline, school,
+      'school-outline': schoolOutline,
+      'construct-outline': constructOutline
     });
   }
 
@@ -145,6 +153,7 @@ export class EmployeeprofileComponent implements OnInit {
           this.loadAboutMe(user.uid);
           this.loadEducations(user.uid);
           this.loadWorkExperiences(user.uid);
+          this.loadSkills(user.uid);
         },
         error: (err) => {
           console.error('Error loading profile:', err);
@@ -622,6 +631,157 @@ async deleteWorkExperience(wid: number) {
               error: (error) => {
                 console.error('Error deleting work experience:', error);
                 this.showAlert('Error', 'Failed to delete work experience');
+              }
+            });
+          }, 100);
+          return true;
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+}
+
+loadSkills(uid: string) {
+  console.log('Loading skills for uid:', uid);
+  this.isLoadingSkills = true;
+  
+  this.http.get(`${this.apiUrl}/api/skills/user/${uid}/`).subscribe({
+    next: (data: any) => {
+      console.log('Skills loaded:', data);
+      this.skills = data;
+      this.isLoadingSkills = false;
+    },
+    error: (error) => {
+      console.error('Error loading skills:', error);
+      this.isLoadingSkills = false;
+      if (error.status !== 404) {
+        this.showAlert('Error', 'Failed to load skills');
+      } else {
+        this.skills = [];
+      }
+    }
+  });
+}
+
+// Skill modal methods
+openAddSkillModal() {
+  this.skillModalData = {
+    skill: ''
+  };
+  this.showAddSkillModal = true;
+}
+
+closeAddSkillModal() {
+  this.showAddSkillModal = false;
+  this.currentlyEditingSkillId = null;
+}
+
+saveSkill() {
+  const userData = sessionStorage.getItem('currentUser');
+  if (!userData) {
+    this.showAlert('Error', 'User not logged in');
+    return;
+  }
+
+  const user = JSON.parse(userData);
+  const formData = {
+    uid: user.uid,
+    skill: this.skillModalData.skill
+  };
+
+  // Validate required fields
+  if (!formData.skill) {
+    this.showAlert('Error', 'Please enter a skill');
+    return;
+  }
+
+  this.http.post(`${this.apiUrl}/api/skills/add/`, formData).subscribe({
+    next: (response: any) => {
+      this.showAddSkillModal = false;
+      this.loadSkills(user.uid);
+      this.showAlert('Success', 'Skill added successfully');
+    },
+    error: (error) => {
+      console.error('Error adding skill:', error);
+      this.showAlert('Error', 'Failed to add skill');
+    }
+  });
+}
+
+toggleEditSkillsMode() {
+  this.isEditingSkills = !this.isEditingSkills;
+  if (!this.isEditingSkills) {
+    this.currentlyEditingSkillId = null;
+  }
+}
+
+editSkill(skill: any) {
+  this.currentlyEditingSkillId = skill.sid;
+  this.skillModalData = {
+    skill: skill.skill
+  };
+  this.showAddSkillModal = true;
+}
+
+updateSkill() {
+  if (!this.currentlyEditingSkillId) return;
+
+  const formData = {
+    skill: this.skillModalData.skill
+  };
+
+  // Validate required fields
+  if (!formData.skill) {
+    this.showAlert('Error', 'Please enter a skill');
+    return;
+  }
+
+  this.http.put(`${this.apiUrl}/api/skills/update/${this.currentlyEditingSkillId}/`, formData).subscribe({
+    next: (response: any) => {
+      this.showAddSkillModal = false;
+      this.currentlyEditingSkillId = null;
+      const userData = sessionStorage.getItem('currentUser');
+      if (userData) {
+        const user = JSON.parse(userData);
+        this.loadSkills(user.uid);
+      }
+      this.showAlert('Success', 'Skill updated successfully');
+    },
+    error: (error) => {
+      console.error('Error updating skill:', error);
+      this.showAlert('Error', 'Failed to update skill');
+    }
+  });
+}
+
+async deleteSkill(sid: number) {
+  const alert = await this.alertController.create({
+    header: 'Confirm Delete',
+    message: 'Are you sure you want to delete this skill?',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel',
+        cssClass: 'secondary'
+      },
+      {
+        text: 'Delete',
+        cssClass: 'danger',
+        handler: () => {
+          setTimeout(() => {
+            this.http.delete(`${this.apiUrl}/api/skills/delete/${sid}/`).subscribe({
+              next: () => {
+                const userData = sessionStorage.getItem('currentUser');
+                if (userData) {
+                  const user = JSON.parse(userData);
+                  this.loadSkills(user.uid);
+                }
+              },
+              error: (error) => {
+                console.error('Error deleting skill:', error);
+                this.showAlert('Error', 'Failed to delete skill');
               }
             });
           }, 100);

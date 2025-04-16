@@ -20,4 +20,8 @@ urlpatterns = [
     path('api/work-experiences/update/<int:wid>/', views.update_work_experience, name='update_work_experience'),
     path('api/work-experiences/delete/<int:wid>/', views.delete_work_experience, name='delete_work_experience'),
     path('api/work-experiences/user/<str:uid>/', views.get_work_experiences, name='get_work_experiences'),
+    path('api/skills/add/', views.add_skill, name='add_skill'),
+    path('api/skills/update/<int:sid>/', views.update_skill, name='update_skill'),
+    path('api/skills/delete/<int:sid>/', views.delete_skill, name='delete_skill'),
+    path('api/skills/user/<str:uid>/', views.get_skills, name='get_skills'),
 ]   

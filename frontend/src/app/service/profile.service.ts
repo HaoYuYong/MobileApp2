@@ -300,5 +300,67 @@ export class ProfileService {
       })
     );
   }
+
+  /**
+ * Fetch skills for user
+ * @param uid User ID
+ */
+getSkills(uid: string): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/skills/user/${uid}/`).pipe(
+    catchError((error) => {
+      console.error('Error fetching skills:', error);
+      this.showAlert('Skills Error', 'Failed to load skills');
+      return throwError(() => new Error(error));
+    })
+  );
+}
+
+/**
+ * Add new skill
+ * @param skillData {uid: string, skill: string}
+ */
+addSkill(skillData: {
+  uid: string,
+  skill: string
+}): Observable<any> {
+  return this.http.post(`${this.apiUrl}/skills/add/`, skillData).pipe(
+    catchError((error) => {
+      console.error('Error adding skill:', error);
+      this.showAlert('Add Skill Error', error.error?.message || 'Failed to add skill');
+      return throwError(() => new Error(error));
+    })
+  );
+}
+
+/**
+ * Update existing skill
+ * @param sid Skill ID
+ * @param skillData {skill: string}
+ */
+updateSkill(sid: number, skillData: {
+  skill: string
+}): Observable<any> {
+  return this.http.put(`${this.apiUrl}/skills/update/${sid}/`, skillData).pipe(
+    catchError((error) => {
+      console.error('Error updating skill:', error);
+      this.showAlert('Update Error', 'Failed to update skill');
+      return throwError(() => new Error(error));
+    })
+  );
+}
+
+/**
+ * Delete skill
+ * @param sid Skill ID
+ */
+deleteSkill(sid: number): Observable<any> {
+  return this.http.delete(`${this.apiUrl}/skills/delete/${sid}/`).pipe(
+    catchError((error) => {
+      console.error('Error deleting skill:', error);
+      this.showAlert('Delete Error', 'Failed to delete skill');
+      return throwError(() => new Error(error));
+    })
+  );
+}
 }
 

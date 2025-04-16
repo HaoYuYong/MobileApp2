@@ -230,3 +230,26 @@ class WorkExperience(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.user.uid})"
+
+# Skills Database table
+class Skills(models.Model):
+    sid = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='skills',
+        db_column='uid',
+        to_field='uid'
+    )
+    skill = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'skills'
+        verbose_name = 'Skill'
+        verbose_name_plural = 'Skills'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.skill} ({self.user.uid})"

@@ -140,4 +140,44 @@
       </div>
     </div>
   </div>
+
+  <!-- Job Scope Section -->
+  <div class="container job-scope-container">
+    <div class="title">Job Scope</div>
+    
+    <div class="job-scope-content">
+      <div *ngIf="!isJobScopeEditMode" class="job-scope-view">
+        <p class="job-scope-text">{{ jobScopeData?.scope || 'No job scope provided' }}</p>
+      </div>
+      
+      <div *ngIf="isJobScopeEditMode" class="job-scope-edit">
+        <ion-textarea
+          [(ngModel)]="tempJobScope"
+          placeholder="Describe job scope..."
+          autoGrow="true"
+          rows="6">
+        </ion-textarea>
+      </div>
+      
+      <div class="action-buttons">
+        <ion-button *ngIf="!isJobScopeEditMode" fill="outline"
+                  (click)="enterJobScopeEditMode()">
+          <ion-icon slot="start" name="create-outline"></ion-icon>
+          Edit
+        </ion-button>
+        
+        <ion-button *ngIf="isJobScopeEditMode" fill="outline" color="danger"
+                  (click)="cancelJobScopeEdit()">
+          <ion-icon slot="start" name="close-outline"></ion-icon>
+          Cancel
+        </ion-button>
+        
+        <ion-button *ngIf="isJobScopeEditMode" fill="solid" color="success"
+                  (click)="saveJobScope()">
+          <ion-icon slot="start" name="save-outline"></ion-icon>
+          Save
+        </ion-button>
+      </div>
+    </div>
+  </div>
 </ion-content>

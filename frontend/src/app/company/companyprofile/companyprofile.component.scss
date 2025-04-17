@@ -279,6 +279,7 @@
   
   .about-me-content {
     padding: 15px;
+    text-align: justify;
     
     .about-me-view {
       .about-me-text {
@@ -425,3 +426,51 @@ ion-button {
   margin-top: 8px;
 }
 
+/* Job Scope Section */
+.job-scope-container {
+  margin-top: 30px;
+  
+  .job-scope-content {
+    padding: 15px;
+    text-align: justify;
+    
+    .job-scope-view {
+      .job-scope-text {
+        white-space: pre-line;
+        line-height: 1.6;
+        color: #333;
+        margin-bottom: 20px;
+      }
+    }
+    
+    .job-scope-edit {
+      ion-textarea {
+        --color: #000000;
+        color: #000000;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 20px;
+        --highlight-color-focused: #9b59b6;
+      }
+
+      ion-textarea .native-textarea {
+        color: #000000 !important;
+      }
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      
+      ion-button {
+        flex: 1;
+        --border-radius: 8px;
+        --padding-top: 15px;
+        --padding-bottom: 15px;
+        font-weight: 500;
+      }
+    }
+  }
+}

@@ -279,6 +279,7 @@
   
   .about-me-content {
     padding: 15px;
+    text-align: justify;
     
     .about-me-view {
       .about-me-text {
@@ -536,7 +537,7 @@
   }
 }
 
-/* Position Modal (keep existing but ensure consistency) */
+/* Position Modal (***************ITS HERE***************) */
 .add-position-modal {
   position: fixed;
   bottom: 0;
@@ -578,7 +579,7 @@
       --padding-start: 0;
       --inner-padding-end: 0;
       margin-bottom: 15px;
-      // color:black;
+      color:black;
     }
   }
   

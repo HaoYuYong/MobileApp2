@@ -42,6 +42,11 @@ export class CompanyprofileComponent implements OnInit {
   aboutMeData: any = null;
   isAboutMeEditMode = false;
   tempAboutMe = '';
+
+  // Job Scope properties
+  isJobScopeEditMode = false;
+  tempJobScope = '';
+  jobScopeData: any = null;
   
   positionOptions = [
     'Software Engineer', 'Product Manager', 'Data Analyst', 
@@ -75,6 +80,7 @@ export class CompanyprofileComponent implements OnInit {
           this.isLoading = false;
           this.loadJobPositions(user.uid);
           this.loadAboutMe(user.uid);
+          this.loadJobScope(user.uid);
         },
         error: (err) => {
           this.errorMessage = 'Failed to load profile';
@@ -202,5 +208,39 @@ export class CompanyprofileComponent implements OnInit {
       buttons: ['OK']
     });
     await alert.present();
+  }
+
+  // Job Scope Method
+  loadJobScope(uid: string) {
+    this.profileService.getJobScope(uid).subscribe({
+      next: (data) => {
+        this.jobScopeData = data;
+        this.tempJobScope = data?.scope || '';
+      }
+    });
+  }
+  
+  enterJobScopeEditMode() {
+    this.isJobScopeEditMode = true;
+  }
+  
+  cancelJobScopeEdit() {
+    this.isJobScopeEditMode = false;
+  }
+  
+  saveJobScope() {
+    const userData = sessionStorage.getItem('currentUser');
+    if (!userData) return;
+  
+    const user = JSON.parse(userData);
+    this.profileService.saveJobScope({
+      uid: user.uid,
+      scope: this.tempJobScope
+    }).subscribe({
+      next: (res) => {
+        this.jobScopeData = res;
+        this.isJobScopeEditMode = false;
+      }
+    });
   }
 }

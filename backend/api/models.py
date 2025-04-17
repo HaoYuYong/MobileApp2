@@ -253,3 +253,20 @@ class Skills(models.Model):
 
     def __str__(self):
         return f"{self.skill} ({self.user.uid})"
+    
+# Job Scope Database table
+class JobScope(models.Model):
+    jid = models.AutoField(primary_key=True)
+    uid = models.CharField(max_length=100)
+    scope = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'job_scope'
+        indexes = [
+            models.Index(fields=['uid']),
+        ]
+
+    def __str__(self):
+        return f"Job Scope for {self.uid}"

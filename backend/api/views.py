@@ -2,7 +2,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
-from .models import User, JobPosition, AboutMe, Education, WorkExperience, Skills
+from .models import User, JobPosition, AboutMe, Education, WorkExperience, Skills, JobScope
 from django.views.decorators.http import require_http_methods
 import sqlite3
 from django.db import connection
@@ -611,3 +611,62 @@ def skills_handler(request, uid=None, sid=None):
         return delete_skill(request, sid)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_job_scope(request):
+    uid = request.GET.get('uid')
+    if not uid:
+        return JsonResponse({'error': 'UID is required'}, status=400)
+    
+    try:
+        job_scope = JobScope.objects.filter(uid=uid).first()
+        if job_scope:
+            return JsonResponse({
+                'jid': job_scope.jid,
+                'uid': job_scope.uid,
+                'scope': job_scope.scope,
+                'created_at': job_scope.created_at,
+                'updated_at': job_scope.updated_at
+            })
+        return JsonResponse({'scope': ''})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def save_job_scope(request):
+    try:
+        data = json.loads(request.body)
+        uid = data.get('uid')
+        scope = data.get('scope', '')
+        
+        if not uid:
+            return JsonResponse({'error': 'UID is required'}, status=400)
+        
+        # Create or update
+        job_scope, created = JobScope.objects.update_or_create(
+            uid=uid,
+            defaults={'scope': scope}
+        )
+        
+        return JsonResponse({
+            'jid': job_scope.jid,
+            'uid': job_scope.uid,
+            'scope': job_scope.scope,
+            'created_at': job_scope.created_at,
+            'updated_at': job_scope.updated_at
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def job_scope_handler(request):
+    if request.method == 'GET':
+        return get_job_scope(request)
+    elif request.method == 'POST':
+        return save_job_scope(request)

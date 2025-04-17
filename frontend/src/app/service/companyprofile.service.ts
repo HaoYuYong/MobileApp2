@@ -93,4 +93,16 @@ export class CompanyProfileService {
     });
     await alert.present();
   }
+
+  getJobScope(uid: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/job-scope/?uid=${uid}`).pipe(
+      catchError((error) => throwError(() => error))
+    );
+  }
+  
+  saveJobScope(data: { uid: string; scope: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/job-scope/`, data).pipe(
+      catchError((error) => throwError(() => error))
+    );
+  }
 }

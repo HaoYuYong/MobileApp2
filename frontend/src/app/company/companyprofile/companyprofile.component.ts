@@ -1,14 +1,206 @@
 import { Component, OnInit } from '@angular/core';
+import { CompanyProfileService } from '../../service/companyprofile.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
+import { HttpClient } from '@angular/common/http';
+import { AlertController } from '@ionic/angular';
+import { environment } from '../../../environments/environment';
+import { addIcons } from 'ionicons';
+import { 
+  addOutline,
+  briefcaseOutline,
+  closeOutline,
+  chevronDownOutline,
+  chevronUpOutline,
+  trashOutline,
+  createOutline,
+  saveOutline
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-companyprofile',
   templateUrl: './companyprofile.component.html',
   styleUrls: ['./companyprofile.component.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule]
 })
-export class CompanyprofileComponent  implements OnInit {
+export class CompanyprofileComponent implements OnInit {
+  private apiUrl = environment.apiUrl;
+  userProfile: any = {};
+  isLoading = true;
+  errorMessage = '';
+  isDropdownOpen = false;
+  
+  // Job position properties
+  jobPositions: any[] = [];
+  isLoadingPositions = true;
+  showAddPositionModal = false;
+  selectedPosition: string | null = null;
 
-  constructor() { }
+  // About me properties
+  aboutMeData: any = null;
+  isAboutMeEditMode = false;
+  tempAboutMe = '';
+  
+  positionOptions = [
+    'Software Engineer', 'Product Manager', 'Data Analyst', 
+    'UX Designer', 'DevOps Engineer', 'System Administrator'
+  ];
 
-  ngOnInit() {}
+  constructor(
+    private profileService: CompanyProfileService,
+    private http: HttpClient,
+    private alertController: AlertController
+  ) {
+    addIcons({
+      'add-outline': addOutline,
+      'briefcase-outline': briefcaseOutline,
+      'close-outline': closeOutline,
+      'chevron-down-outline': chevronDownOutline,
+      'chevron-up-outline': chevronUpOutline,
+      'trash-outline': trashOutline,
+      'create-outline': createOutline,
+      'save-outline': saveOutline
+    });
+  }
 
+  ngOnInit() {
+    const userData = sessionStorage.getItem('currentUser');
+    if (userData) {
+      const user = JSON.parse(userData);
+      this.profileService.fetchProfile(user.uid).subscribe({
+        next: (profile) => {
+          this.userProfile = profile;
+          this.isLoading = false;
+          this.loadJobPositions(user.uid);
+          this.loadAboutMe(user.uid);
+        },
+        error: (err) => {
+          this.errorMessage = 'Failed to load profile';
+          this.isLoading = false;
+        }
+      });
+    } else {
+      this.errorMessage = 'User not logged in';
+      this.isLoading = false;
+    }
+  }
+
+  // Basic Info Methods
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  // Job Position Methods
+  loadJobPositions(uid: string) {
+    this.isLoadingPositions = true;
+    this.profileService.fetchJobPositions(uid).subscribe({
+      next: (data: any) => {
+        this.jobPositions = data;
+        this.isLoadingPositions = false;
+      },
+      error: () => {
+        this.isLoadingPositions = false;
+        this.jobPositions = [];
+      }
+    });
+  }
+
+  openAddPositionModal() {
+    this.selectedPosition = null;
+    this.showAddPositionModal = true;
+  }
+
+  closeAddPositionModal() {
+    this.showAddPositionModal = false;
+  }
+
+  savePosition() {
+    if (!this.selectedPosition) return;
+
+    const userData = sessionStorage.getItem('currentUser');
+    if (!userData) return;
+
+    const user = JSON.parse(userData);
+    this.profileService.addJobPosition({
+      user: user.uid,
+      position: this.selectedPosition
+    }).subscribe({
+      next: () => {
+        this.loadJobPositions(user.uid);
+        this.closeAddPositionModal();
+      },
+      error: async (error) => {
+        const message = error.error?.error?.includes('exists') 
+          ? 'Position already exists' 
+          : 'Failed to save position';
+        await this.showAlert('Error', message);
+      }
+    });
+  }
+
+  async deletePosition(positionId: number) {
+    const alert = await this.alertController.create({
+      header: 'Confirm Delete',
+      message: 'Are you sure?',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Delete',
+          handler: () => {
+            this.profileService.deleteJobPosition(positionId).subscribe({
+              next: () => this.loadJobPositions(
+                JSON.parse(sessionStorage.getItem('currentUser')!).uid
+              )
+            });
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  // About Me Methods
+  loadAboutMe(uid: string) {
+    this.profileService.getAboutMe(uid).subscribe({
+      next: (data) => {
+        this.aboutMeData = data;
+        this.tempAboutMe = data?.about || '';
+      }
+    });
+  }
+
+  enterAboutMeEditMode() {
+    this.isAboutMeEditMode = true;
+  }
+
+  cancelAboutMeEdit() {
+    this.isAboutMeEditMode = false;
+  }
+
+  saveAboutMe() {
+    const userData = sessionStorage.getItem('currentUser');
+    if (!userData) return;
+
+    const user = JSON.parse(userData);
+    this.profileService.saveAboutMe({
+      uid: user.uid,
+      about: this.tempAboutMe
+    }).subscribe({
+      next: (res) => {
+        this.aboutMeData = res;
+        this.isAboutMeEditMode = false;
+      }
+    });
+  }
+
+  private async showAlert(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
 }

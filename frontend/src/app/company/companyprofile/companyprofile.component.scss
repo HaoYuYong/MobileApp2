@@ -1,0 +1,427 @@
+/* Importing Google Fonts - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* Apply to the host component */
+:host {
+  font-family: 'Poppins', sans-serif;
+  display: block;
+  height: 100%;
+  
+  ion-content {
+    --background: linear-gradient(135deg, #71b7e6, #9b59b6);
+    --padding-start: 20px;
+    --padding-end: 20px;
+    --padding-top: 20px;
+    --padding-bottom: 20px;
+  }
+}
+
+/* Container styles */
+.container {
+  max-width: 600px;
+  width: calc(100% - 40px); // Subtract padding from total width
+  background-color: #fff;
+  padding: 25px 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  position: relative;
+
+  /* Title styles */
+  .title {
+    font-size: 24px;
+    font-weight: 600;
+    position: relative;
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+      font-weight: normal;
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: -8px;
+      height: 3px;
+      width: 30px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, #71b7e6, #9b59b6);
+    }
+  }
+
+  /* Profile details styles */
+  .profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+
+    ion-item {
+      --background: transparent;
+      --border-color: #e0e0e0;
+      --border-width: 0 0 1px 0;
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      --min-height: 60px;
+      margin-bottom: 5px;
+      border-radius: 8px;
+
+      &:last-child {
+        --border-width: 0;
+      }
+
+      ion-label {
+        color: #555;
+        font-weight: 500;
+        margin-bottom: 5px;
+      }
+
+      ion-input {
+        color: black;
+        font-weight: 400;
+      }
+
+      ion-icon {
+        color: #9b59b6;
+        margin-right: 10px;
+      }
+    }
+  }
+
+  /* Loading spinner */
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+
+    ion-spinner {
+      width: 40px;
+      height: 40px;
+      color: #9b59b6;
+    }
+  }
+
+  /* Error message */
+  .error-message {
+    color: #e74c3c;
+    text-align: center;
+    padding: 20px;
+    font-weight: 500;
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  :host {
+    ion-content {
+      --padding-start: 15px;
+      --padding-end: 15px;
+      --padding-top: 15px;
+      --padding-bottom: 15px;
+    }
+  }
+
+  .container {
+    width: calc(100% - 30px);
+    padding: 20px;
+    margin: 10px auto;
+  }
+}
+
+@media (max-width: 480px) {
+  :host {
+    ion-content {
+      --padding-start: 10px;
+      --padding-end: 10px;
+      --padding-top: 10px;
+      --padding-bottom: 10px;
+    }
+  }
+
+  .container {
+    width: calc(100% - 20px);
+    padding: 15px;
+    margin: 10px auto;
+
+    .title {
+      font-size: 20px;
+    }
+
+    .profile-details {
+      padding: 5px;
+    }
+  }
+}
+
+// Dropdown Menu CSS
+.basic-info-section {
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  
+  .basic-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    cursor: pointer;
+    
+    .basic-info-title {
+      font-weight: 600;
+      color: #333;
+      font-size: 1.1rem;
+    }
+    
+    .dropdown-icon {
+      font-size: 1.2rem;
+      color: #666;
+      transition: transform 0.3s ease;
+    }
+  }
+  
+  .basic-info-content {
+    padding: 0 15px 15px;
+    
+    ion-item {
+      --background: transparent;
+      --border-color: #e0e0e0;
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      margin-bottom: 10px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+/* Job Position Container Styles */
+.job-position-container {
+  margin-top: 30px;
+  
+  .job-position-content {
+    padding: 15px;
+    
+    .empty-state {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+    
+    .positions-list {
+      margin-bottom: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      
+      .position-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        .position-icon {
+          margin-right: 12px;
+          color: #9b59b6;
+          font-size: 18px;
+        }
+        
+        .position-text {
+          flex: 1;
+          color: #333;
+          font-weight: 500;
+        }
+        
+        .delete-icon {
+          color: #e74c3c;
+          font-size: 18px;
+          cursor: pointer;
+          padding: 5px;
+        }
+      }
+    }
+    
+    .add-button-container {
+      margin-top: 15px;
+      
+      ion-button {
+        --border-radius: 8px;
+        --padding-top: 15px;
+        --padding-bottom: 15px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+/* About Me Section */
+.about-me-container {
+  margin-top: 30px;
+  
+  .about-me-content {
+    padding: 15px;
+    
+    .about-me-view {
+      .about-me-text {
+        white-space: pre-line;
+        line-height: 1.6;
+        color: #333;
+        margin-bottom: 20px;
+      }
+    }
+    
+    .about-me-edit {
+      ion-textarea {
+        --color: #000000;
+        color: #000000;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 20px;
+        --highlight-color-focused: #9b59b6;
+      }
+
+      ion-textarea .native-textarea {
+        color: #000000 !important;
+      }
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      
+      ion-button {
+        flex: 1;
+        --border-radius: 8px;
+        --padding-top: 15px;
+        --padding-bottom: 15px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+/* Position Modal (keep existing but ensure consistency) */
+.add-position-modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  z-index: 1001;
+  max-height: 50vh;
+  overflow-y: auto;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    ion-icon {
+      font-size: 1.5rem;
+      color: #666;
+      cursor: pointer;
+    }
+  }
+  
+  .modal-content {
+    ion-item {
+      --background: transparent;
+      --border-color: #e0e0e0;
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      margin-bottom: 15px;
+      color:black;
+    }
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    
+    ion-button {
+      --border-radius: 6px;
+      --padding-start: 20px;
+      --padding-end: 20px;
+    }
+  }
+}
+
+/* Animation for modals */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* General Styles */
+ion-card {
+  margin: 16px;
+}
+
+.empty-message {
+  color: var(--ion-color-medium);
+  font-style: italic;
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.add-form, .edit-form {
+  padding: 16px;
+  border: 1px solid var(--ion-color-light);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 16px;
+}
+
+ion-button {
+  margin-top: 8px;
+}
+

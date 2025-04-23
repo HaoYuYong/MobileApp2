@@ -670,3 +670,39 @@ def job_scope_handler(request):
         return get_job_scope(request)
     elif request.method == 'POST':
         return save_job_scope(request)
+    
+# To fetch companies with open position and job scopes
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_companies_with_positions_and_scopes(request):
+    try:
+        companies = User.objects.filter(role='company').values('uid', 'name', 'email', 'phone')
+        
+        company_data = []
+        for company in companies:
+            positions = JobPosition.objects.filter(user__uid=company['uid']).values('id', 'position')
+            job_scope = JobScope.objects.filter(uid=company['uid']).first()
+            about_info = AboutMe.objects.filter(uid=company['uid']).first()
+            
+            # Preserve newlines by replacing them with HTML line breaks
+            scope = job_scope.scope if job_scope else ''
+            scope = scope.replace('\n', '<br>') if scope else ''
+
+            # Get about info
+            about = about_info.about if about_info else ''
+            about = about.replace('\n', '<br>') if about else ''
+            
+            company_data.append({
+                'uid': company['uid'],
+                'name': company['name'],
+                'email': company['email'],
+                'phone': company['phone'],
+                'positions': list(positions),
+                'scope': scope,
+                'about': about
+            })
+            
+        return JsonResponse(company_data, safe=False)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

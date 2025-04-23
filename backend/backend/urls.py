@@ -25,4 +25,5 @@ urlpatterns = [
     path('api/skills/delete/<int:sid>/', views.delete_skill, name='delete_skill'),
     path('api/skills/user/<str:uid>/', views.get_skills, name='get_skills'),
     path('api/job-scope/', views.job_scope_handler, name='job_scope'),
+    path('api/companies/', views.get_companies_with_positions_and_scopes, name='get-companies'),
 ]   

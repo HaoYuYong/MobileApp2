@@ -49,8 +49,13 @@ export class CompanyprofileComponent implements OnInit {
   jobScopeData: any = null;
   
   positionOptions = [
-    'Software Engineer', 'Product Manager', 'Data Analyst', 
-    'UX Designer', 'DevOps Engineer', 'System Administrator'
+    'Engineer', 'Doctor', 'Accounting', 'Marketing', 'Part Timer', 
+    'Event Crew', 'Software Engineer', 'Data Analyst', 'Product Manager',
+    'UX Designer', 'DevOps Engineer', 'QA Engineer', 'System Administrator',
+    'Technical Writer', 'Frontend Developer', 'Backend Developer',
+    'Full Stack Developer', 'Mobile Developer', 'Data Scientist',
+    'Machine Learning Engineer', 'Cloud Architect', 'Network Engineer',
+    'Security Specialist'
   ];
 
   constructor(

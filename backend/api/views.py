@@ -2,15 +2,15 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
-from .models import User, JobPosition, AboutMe, Education, WorkExperience, Skills, JobScope
+from .models import User, JobPosition, AboutMe, Education, WorkExperience, Skills, JobScope, Favourite
 from django.views.decorators.http import require_http_methods
 import sqlite3
 from django.db import connection
 from django.db import IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
+# from django.core.exceptions import ObjectDoesNotExist
+# from rest_framework.decorators import api_view
+# from rest_framework.response import Response
+# from rest_framework import status
 
 @csrf_exempt
 def register(request):
@@ -703,6 +703,80 @@ def get_companies_with_positions_and_scopes(request):
             })
             
         return JsonResponse(company_data, safe=False)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+# Favourite
+@csrf_exempt
+@require_http_methods(["POST"])
+def toggle_favourite(request):
+    try:
+        data = json.loads(request.body)
+        user_uid = data.get('user_uid')
+        company_uid = data.get('company_uid')
+        
+        if not user_uid or not company_uid:
+            return JsonResponse({'error': 'Both user_uid and company_uid are required'}, status=400)
+        
+        try:
+            user = User.objects.get(uid=user_uid)
+            company = User.objects.get(uid=company_uid, role='company')
+            
+            # Check if favourite exists
+            favourite, created = Favourite.objects.get_or_create(
+                user=user,
+                company=company
+            )
+            
+            if not created:
+                favourite.delete()
+                return JsonResponse({'status': 'removed', 'message': 'Company removed from favourites'})
+            
+            return JsonResponse({'status': 'added', 'message': 'Company added to favourites'})
+            
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User or Company not found'}, status=404)
+            
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_favourites(request):
+    user_uid = request.GET.get('user_uid')
+    if not user_uid:
+        return JsonResponse({'error': 'user_uid is required'}, status=400)
+    
+    try:
+        favourites = Favourite.objects.filter(user__uid=user_uid).select_related('company')
+        
+        favourite_companies = []
+        for fav in favourites:
+            company = fav.company
+            positions = JobPosition.objects.filter(user=company).values('id', 'position')
+            job_scope = JobScope.objects.filter(uid=company.uid).first()
+            about_info = AboutMe.objects.filter(uid=company.uid).first()
+            
+            scope = job_scope.scope if job_scope else ''
+            scope = scope.replace('\n', '<br>') if scope else ''
+
+            about = about_info.about if about_info else ''
+            about = about.replace('\n', '<br>') if about else ''
+            
+            favourite_companies.append({
+                'uid': company.uid,
+                'name': company.name,
+                'email': company.email,
+                'phone': company.phone,
+                'positions': list(positions),
+                'scope': scope,
+                'about': about
+            })
+            
+        return JsonResponse(favourite_companies, safe=False)
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

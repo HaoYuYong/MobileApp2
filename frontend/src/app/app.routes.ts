@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 //Employee
 import { HomeComponent } from './employee/employeehome/employeehome.component';
 import { JobseekComponent } from './employee/jobseek/jobseek.component';
-import { CreatecvComponent } from './employee/createcv/createcv.component';
+import { FavouriteComponent } from './employee/favourite/favourite.component';
 import { EmployeeprofileComponent } from './employee/employeeprofile/employeeprofile.component';
 //Company
 import { CompanyhomeComponent } from './company/companyhome/companyhome.component';
@@ -21,7 +21,7 @@ export const appRoutes: Routes = [
   //Employee
   { path: 'emp-home', component: HomeComponent },
   { path: 'emp-jobseek', component: JobseekComponent },
-  { path: 'emp-createcv', component: CreatecvComponent },
+  { path: 'emp-favourite', component: FavouriteComponent },
   { path: 'emp-profile', component: EmployeeprofileComponent },
 
   //General

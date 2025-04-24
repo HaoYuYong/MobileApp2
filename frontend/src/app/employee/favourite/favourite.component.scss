@@ -1,0 +1,367 @@
+/* Importing Google Fonts - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+:host {
+  font-family: 'Poppins', sans-serif;
+  display: block;
+  height: 100%;
+  
+  ion-content {
+    --background: #f5f5f5;
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+  }
+}
+
+/* Search bar styling */
+.search-bar {
+  // Container styling
+  padding: 16px;
+  background: linear-gradient(135deg, #71b7e6, #9b59b6);
+  
+  // Force black search icon using Ionic variables
+  --icon-color: white !important;
+  --searchbar-search-icon-color: #000000 !important;
+  
+  // Input container
+  .searchbar-input-container {
+    // Input field
+    .searchbar-input {
+      background: rgba(255, 255, 255, 0.9);
+      color: #333333;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      padding-left: 42px;
+      padding-right: 36px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      
+      &::placeholder {
+        color: #555555;
+        opacity: 1;
+      }
+    }
+    
+    // Search icon - multiple ways to target it
+    .searchbar-search-icon {
+      color: #000000 !important;
+      
+      svg {
+        fill: #000000 !important;
+        stroke: #000000 !important;
+      }
+      
+      path {
+        fill: #000000 !important;
+        stroke: #000000 !important;
+      }
+    }
+  }
+  
+  // Clear icon
+  .searchbar-clear-button {
+    color: #555555 !important;
+    
+    &:hover {
+      color: #000000 !important;
+    }
+  }
+  
+  // Focus state
+  &.searchbar-has-focus {
+    .searchbar-search-icon {
+      color: #000000 !important;
+      
+      svg, path {
+        fill: #000000 !important;
+      }
+    }
+  }
+}
+
+/* Main content area */
+.main-content {
+  display: flex;
+  height: calc(100% - 72px); /* Subtract search bar height */
+}
+
+/* Columns */
+.company-list-column {
+  width: 35%;
+  background: linear-gradient(135deg, #71b7e6, #9b59b6);
+  border-right: 1px solid #e0e0e0;
+  height: 100%;
+}
+
+.details-column {
+  width: 65%;
+  padding: 16px;
+  overflow-y: auto;
+  height: 100%;
+  background: linear-gradient(135deg, #71b7e6, #9b59b6);
+}
+
+/* Company list styling */
+ion-list {
+  padding: 0;
+}
+
+ion-item {
+  --padding-start: 16px;
+  --padding-end: 0px;
+  --min-height: 72px;
+  --background: white;
+  border-bottom: 0px solid #f0f0f0;
+  cursor: pointer;
+  
+  &.selected {
+    background-color: rgb(103, 214, 103);
+    border-left: 4px solid rgb(103, 214, 103);
+    border-color: rgb(103, 214, 103);
+  }
+  
+  h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
+  }
+  
+  p {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+  }
+  
+  ion-icon {
+    color: #1976d2;
+  }
+}
+
+/* No selection state */
+.no-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: white;
+  background: linear-gradient(135deg, #71b7e6, #9b59b6);
+  
+  ion-icon {
+    font-size: 48px;
+    color: white;
+    margin-bottom: 16px;
+  }
+  
+  h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  
+  p {
+    font-size: 14px;
+  }
+}
+
+/* Company details styling */
+.company-details {
+  ion-card {
+    box-shadow: none;
+    border: 1px solid #e0e0e0;
+    background: white;
+    
+    ion-card-header {
+      padding-bottom: 14px; 
+      position: relative;
+      
+      ion-card-title {
+        display: block;
+        position: relative;
+        
+        .title-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+        }
+        
+        .company-name {
+          font-size: 24px;
+          font-weight: 600;
+          color: #333;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          flex-grow: 1;
+          padding-right: 16px; 
+        }
+
+        .favorite-btn {
+          --padding-start: 0;
+          --padding-end: 0;
+          margin-left: auto; 
+          
+          ion-icon {
+            font-size: 24px;
+            color: var(--ion-color-danger);
+          }
+        }
+
+        &::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          bottom: 0;
+          height: 3px;
+          width: 30px;
+          border-radius: 5px;
+          background: linear-gradient(135deg, #71b7e6, #9b59b6);
+        }
+      }
+    }
+    
+    ion-card-content {
+      padding-top: 0;
+      color: #333;
+    }
+  }
+  
+  .section {
+    margin-top: 3px;
+    text-align: justify;
+    
+    ion-list-header {
+      padding-left: 0;
+      min-height: 40px;
+      color: #333;
+      
+      ion-label {
+        font-size: 18px;
+        font-weight: 600;
+        color:#333;
+      }
+    }
+    
+    ion-item {
+      --padding-start: 0;
+      --min-height: 48px;
+      color: #333;
+    }
+  }
+  
+  .scope-content {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #000000;
+    padding: 8px 0;
+    
+    .list-number {
+      font-weight: 500;
+      color: #1976d2;
+    }
+  }
+
+  .contact-info {
+    margin-top: 16px;
+    
+    ion-item {
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      --min-height: 48px;
+      
+      ion-icon {
+        color: #1976d2;
+        margin-right: 12px;
+      }
+      
+      h3 {
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+        margin-bottom: 4px;
+      }
+      
+      p {
+        font-size: 16px;
+        color: #333;
+        margin: 0;
+      }
+    }
+  }
+
+  .about-content {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #000000;
+    padding: 8px 0;
+    text-align: justify;
+    text-justify: inter-word;
+    white-space: pre-line;
+  }
+}
+
+/* Filter Modal Styles */
+ion-modal {
+  --background: white;
+  --border-radius: 16px 16px 0 0;
+  --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  
+  ion-header {
+    ion-toolbar {
+      --background: white;
+      --color: black;
+    }
+  }
+
+  ion-content {
+    --background: white;
+    --color: black;
+    
+    ion-list {
+      background: transparent;
+      
+      ion-item {
+        --background: transparent;
+        --color: black;
+        
+        ion-select {
+          color: black;
+        }
+      }
+    }
+  }
+
+  .filter-actions {
+    ion-button {
+      --background: rgb(60, 147, 229);
+      --color: white;
+      
+      &[fill="outline"] {
+        --background: rgb(60, 147, 229);
+        --color: white;
+      }
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .company-list-column,
+  .details-column {
+    width: 100%;
+    height: auto;
+  }
+  
+  .company-list-column {
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+}

@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { JobSeekService } from '../../service/jobseek.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { businessOutline, briefcaseOutline, informationCircleOutline, searchOutline, filterOutline, heartOutline, heart, mailOutline, callOutline } from 'ionicons/icons';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { businessOutline, briefcaseOutline, mailOutline, callOutline, heart, heartOutline, filterOutline  } from 'ionicons/icons';
 import { FavouriteService } from '../../service/favourite.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
 interface Company {
@@ -22,27 +21,25 @@ interface Company {
 }
 
 @Component({
-  selector: 'app-jobseek',
+  selector: 'app-favourite',
   standalone: true,
-  templateUrl: './jobseek.component.html',
-  styleUrls: ['./jobseek.component.scss'],
+  templateUrl: './favourite.component.html',
+  styleUrls: ['./favourite.component.scss'],
   imports: [CommonModule, FormsModule, IonicModule]
 })
-export class JobseekComponent implements OnInit {
+export class FavouriteComponent implements OnInit {
   companies: Company[] = [];
   filteredCompanies: Company[] = [];
   isLoading = true;
   errorMessage = '';
-  expandedCompany: string | null = null;
   searchTerm = '';
   selectedPosition = '';
   positionOptions: string[] = [];
   showFilterModal = false;
   selectedCompany: Company | null = null;
-  isFavorite = false;
+  isFavorite = true; // Always true since we're in favorites page
 
   constructor(
-    private jobSeekService: JobSeekService,
     private favouriteService: FavouriteService,
     private sanitizer: DomSanitizer,
     private alertController: AlertController,
@@ -51,18 +48,16 @@ export class JobseekComponent implements OnInit {
     addIcons({ 
       businessOutline, 
       briefcaseOutline,
-      informationCircleOutline,
-      searchOutline,
-      filterOutline,
-      heartOutline,
-      heart,
       mailOutline,
-      callOutline
+      callOutline,
+      heart,
+      heartOutline,
+      filterOutline 
     });
   }
 
   ngOnInit() {
-    this.loadCompanies();
+    this.loadFavourites();
   }
 
   private getCurrentUserUid(): string | null {
@@ -86,7 +81,7 @@ export class JobseekComponent implements OnInit {
   private async showLoginAlert() {
     const alert = await this.alertController.create({
       header: 'Login Required',
-      message: 'You need to login to favorite companies.',
+      message: 'You need to login to view favorite companies.',
       buttons: [
         {
           text: 'Cancel',
@@ -103,36 +98,21 @@ export class JobseekComponent implements OnInit {
     await alert.present();
   }
 
-  async toggleFavorite() {
-    if (!this.selectedCompany) return;
+  loadFavourites() {
+    this.isLoading = true;
+    this.errorMessage = '';
     
     const userUid = this.getCurrentUserUid();
-    console.log('Current User UID:', userUid); // Debug log
+    console.log('Loading favorites for user:', userUid); // Debug log
     
     if (!userUid) {
-      console.log('No user UID found, showing login alert');
-      await this.showLoginAlert();
+      this.errorMessage = 'User not logged in';
+      this.isLoading = false;
+      this.showLoginAlert();
       return;
     }
     
-    try {
-      const response = await this.favouriteService.toggleFavourite(userUid, this.selectedCompany.uid).toPromise();
-      this.isFavorite = response.status === 'added';
-    } catch (err) {
-      console.error('Error toggling favorite:', err);
-      const alert = await this.alertController.create({
-        header: 'Error',
-        message: 'Failed to update favorite. Please try again.',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
-  }
-
-  loadCompanies() {
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.jobSeekService.getCompanies().subscribe({
+    this.favouriteService.getFavourites(userUid).subscribe({
       next: (data: Company[]) => {
         this.companies = data.map(company => ({
           ...company,
@@ -144,11 +124,37 @@ export class JobseekComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        this.errorMessage = 'Failed to load companies. Please try again later.';
+        this.errorMessage = 'Failed to load favourite companies. Please try again later.';
         this.isLoading = false;
-        console.error('Error loading companies:', err);
+        console.error('Error loading favourites:', err);
       }
     });
+  }
+
+  async removeFromFavorites() {
+    if (!this.selectedCompany) return;
+    
+    const userUid = this.getCurrentUserUid();
+    if (!userUid) {
+      await this.showLoginAlert();
+      return;
+    }
+    
+    try {
+      await this.favouriteService.toggleFavourite(userUid, this.selectedCompany.uid).toPromise();
+      // Remove from local lists
+      this.companies = this.companies.filter(c => c.uid !== this.selectedCompany?.uid);
+      this.filteredCompanies = this.filteredCompanies.filter(c => c.uid !== this.selectedCompany?.uid);
+      this.selectedCompany = null;
+    } catch (err) {
+      console.error('Error removing favorite:', err);
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: 'Failed to remove from favorites. Please try again.',
+        buttons: ['OK']
+      });
+      await alert.present();
+    }
   }
 
   formatScope(scope: string | undefined): string {
@@ -208,35 +214,12 @@ export class JobseekComponent implements OnInit {
     this.showFilterModal = false;
   }
 
-  checkIsFavorite(companyUid: string) {
-    const userUid = this.getCurrentUserUid();
-    if (!userUid) {
-      this.isFavorite = false;
-      return;
-    }
-    
-    this.favouriteService.getFavourites(userUid).subscribe({
-      next: (favourites) => {
-        this.isFavorite = favourites.some(fav => fav.uid === companyUid);
-      },
-      error: (err) => {
-        console.error('Error checking favorites:', err);
-        this.isFavorite = false;
-      }
-    });
-  }
-
   selectCompany(company: Company) {
     this.selectedCompany = {
       ...company,
       formattedScope: this.formatScope(company.scope),
       formattedAbout: this.formatAbout(company.about)
     };
-    this.checkIsFavorite(company.uid);
-  }
-
-  toggleCompany(uid: string) {
-    this.expandedCompany = this.expandedCompany === uid ? null : uid;
   }
 
   hasPositions(company: Company): boolean {

@@ -270,3 +270,32 @@ class JobScope(models.Model):
 
     def __str__(self):
         return f"Job Scope for {self.uid}"
+    
+# Favourite Database table
+class Favourite(models.Model):
+    fid = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favourites',
+        db_column='user_uid',
+        to_field='uid'
+    )
+    company = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favourited_by',
+        db_column='company_uid',
+        to_field='uid'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'favourites'
+        verbose_name = 'Favourite'
+        verbose_name_plural = 'Favourites'
+        unique_together = ('user', 'company')
+
+    def __str__(self):
+        return f"{self.user.name} favs {self.company.name}"

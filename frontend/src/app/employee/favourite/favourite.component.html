@@ -1,7 +1,7 @@
 <ion-content>
   <ion-header>
     <ion-toolbar color="primary">
-      <ion-title>Job Opportunities</ion-title>
+      <ion-title>Favourite Companies</ion-title>
       <ion-buttons slot="end">
         <ion-button (click)="showFilterModal = true" fill="clear">
           <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
@@ -23,7 +23,7 @@
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container">
     <ion-spinner name="crescent"></ion-spinner>
-    <p>Loading job opportunities...</p>
+    <p>Loading favourite companies...</p>
   </div>
 
   <!-- Error State -->
@@ -33,16 +33,16 @@
     </ion-card-header>
     <ion-card-content>
       {{ errorMessage }}
-      <ion-button expand="block" (click)="loadCompanies()">Retry</ion-button>
+      <ion-button expand="block" (click)="loadFavourites()">Retry</ion-button>
     </ion-card-content>
   </ion-card>
 
   <!-- Empty State -->
   <div *ngIf="!isLoading && !errorMessage && filteredCompanies.length === 0" class="no-selection">
-    <ion-icon name="business-outline"></ion-icon>
-    <h3>No Companies Found</h3>
+    <ion-icon name="heart-outline"></ion-icon>
+    <h3>No Favourite Companies</h3>
     <p *ngIf="searchTerm || selectedPosition">Try adjusting your search or filters</p>
-    <p *ngIf="!searchTerm && !selectedPosition">There are currently no companies hiring.</p>
+    <p *ngIf="!searchTerm && !selectedPosition">You haven't marked any companies as favorite yet.</p>
     <ion-button (click)="clearFilters()">Clear Filters</ion-button>
   </div>
 
@@ -71,7 +71,7 @@
     <div class="details-column">
       <div *ngIf="!selectedCompany" class="no-selection">
         <ion-icon name="briefcase-outline"></ion-icon>
-        <h3>Select a job</h3>
+        <h3>Select a company</h3>
         <p>Choose a company from the list to view details</p>
       </div>
 
@@ -81,15 +81,8 @@
             <ion-card-title>
               <div class="title-row">
                 <span class="company-name">{{ selectedCompany.name }}</span>
-                <ion-button 
-                  fill="clear" 
-                  class="favorite-btn" 
-                  (click)="toggleFavorite()"
-                  [disabled]="!selectedCompany">
-                  <ion-icon 
-                    [name]="isFavorite ? 'heart' : 'heart-outline'" 
-                    [color]="isFavorite ? 'danger' : 'medium'">
-                  </ion-icon>
+                <ion-button fill="clear" class="favorite-btn" (click)="removeFromFavorites()">
+                  <ion-icon name="heart" color="danger"></ion-icon>
                 </ion-button>
               </div>
             </ion-card-title>

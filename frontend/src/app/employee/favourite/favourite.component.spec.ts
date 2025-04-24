@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { CreatecvComponent } from './createcv.component';
+import { FavouriteComponent } from './favourite.component';
 
-describe('CreatecvComponent', () => {
-  let component: CreatecvComponent;
-  let fixture: ComponentFixture<CreatecvComponent>;
+describe('FavouriteComponent', () => {
+  let component: FavouriteComponent;
+  let fixture: ComponentFixture<FavouriteComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ CreatecvComponent ],
+      declarations: [ FavouriteComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CreatecvComponent);
+    fixture = TestBed.createComponent(FavouriteComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

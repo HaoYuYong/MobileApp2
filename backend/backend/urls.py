@@ -28,4 +28,5 @@ urlpatterns = [
     path('api/companies/', views.get_companies_with_positions_and_scopes, name='get-companies'),
     path('api/favourites/toggle/', views.toggle_favourite, name='toggle-favourite'),
     path('api/favourites/', views.get_favourites, name='get-favourites'),
+    path('api/employees/', views.get_employees_with_details, name='get-employees'),
 ]   

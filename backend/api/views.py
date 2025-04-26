@@ -780,3 +780,38 @@ def get_favourites(request):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_employees_with_details(request):
+    try:
+        employees = User.objects.filter(role='employee').values('uid', 'name', 'email', 'phone')
+        
+        employee_data = []
+        for employee in employees:
+            positions = JobPosition.objects.filter(user__uid=employee['uid']).values('id', 'position')
+            about_info = AboutMe.objects.filter(uid=employee['uid']).first()
+            educations = Education.objects.filter(user__uid=employee['uid']).order_by('-created_at')
+            experiences = WorkExperience.objects.filter(user__uid=employee['uid']).order_by('-created_at')
+            skills = Skills.objects.filter(user__uid=employee['uid']).order_by('-created_at')
+            
+            # Get about info
+            about = about_info.about if about_info else ''
+            about = about.replace('\n', '<br>') if about else ''
+            
+            employee_data.append({
+                'uid': employee['uid'],
+                'name': employee['name'],
+                'email': employee['email'],
+                'phone': employee['phone'],
+                'positions': list(positions),
+                'about': about,
+                'educations': list(educations.values()),
+                'work_experiences': list(experiences.values()),
+                'skills': list(skills.values())
+            })
+            
+        return JsonResponse(employee_data, safe=False)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

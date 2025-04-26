@@ -45,6 +45,15 @@ export class EmployeeprofileComponent implements OnInit {
   errorMessage = '';
   isDropdownOpen = false;
   
+  // Registered data properties
+  isProfileEditMode: boolean = false;
+  tempProfileData: any = {
+    name: '',
+    phone: '',
+    dob: '',
+    address: ''
+  };
+
   // Job position properties
   jobPositions: any[] = [];
   isLoadingPositions = true;
@@ -166,6 +175,65 @@ export class EmployeeprofileComponent implements OnInit {
       this.errorMessage = 'User not logged in';
       this.isLoading = false;
     }
+  }
+
+  // Registered data edit mode
+  enterProfileEditMode() {
+    this.isProfileEditMode = true;
+    this.tempProfileData = {
+      name: this.userProfile.name,
+      phone: this.userProfile.phone,
+      dob: this.userProfile.dob,
+      address: this.userProfile.address
+    };
+  }
+  
+  cancelProfileEdit() {
+    this.isProfileEditMode = false;
+  }
+  
+  hasProfileChanges(): boolean {
+    return (
+      this.tempProfileData.name !== this.userProfile.name ||
+      this.tempProfileData.phone !== this.userProfile.phone ||
+      this.tempProfileData.dob !== this.userProfile.dob ||
+      this.tempProfileData.address !== this.userProfile.address
+    );
+  }
+  
+  saveProfile() {
+    const userData = sessionStorage.getItem('currentUser');
+    if (!userData) {
+      this.showAlert('Error', 'User not logged in');
+      return;
+    }
+  
+    const user = JSON.parse(userData);
+    const profileData = {
+      uid: user.uid,
+      name: this.tempProfileData.name,
+      phone: this.tempProfileData.phone,
+      dob: this.tempProfileData.dob,
+      address: this.tempProfileData.address
+    };
+  
+    this.http.put(`${this.apiUrl}/api/profile/update/`, profileData).subscribe({
+      next: (response: any) => {
+        this.userProfile = {
+          ...this.userProfile,
+          name: response.name,
+          phone: response.phone,
+          dob: response.dob,
+          address: response.address
+        };
+        this.isProfileEditMode = false;
+        this.showAlert('Success', 'Profile updated successfully');
+      },
+      error: async (error) => {
+        console.error('Error saving profile:', error);
+        await this.showAlert('Error', 'Failed to update profile');
+      }
+    });
   }
 
   toggleDropdown() {

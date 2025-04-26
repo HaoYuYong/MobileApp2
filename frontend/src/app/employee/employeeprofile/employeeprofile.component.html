@@ -1,4 +1,5 @@
 <ion-content>
+  <!-- First Container - Profile Details -->
   <div class="container">
     <div class="title">{{ userProfile?.name ? userProfile.name : 'My Profile' }}</div>
     
@@ -13,39 +14,110 @@
       </div>
       
       <div *ngIf="!isLoading && !errorMessage" class="profile-details">
-        
-        <ion-item>
-          <ion-label position="stacked">Email</ion-label>
-          <ion-input type="email" [value]="userProfile.email" readonly></ion-input>
-        </ion-item>
+        <!-- View Mode -->
+        <div *ngIf="!isProfileEditMode">
+          <ion-item>
+            <ion-label position="stacked">Email</ion-label>
+            <ion-input type="email" [value]="userProfile.email" readonly></ion-input>
+          </ion-item>
 
-        <!-- Basic Info Section with Dropdown -->
-        <div class="basic-info-section" (click)="toggleDropdown()">
-          <div class="basic-info-header">
-            <div class="basic-info-title">More Information</div>
-            <ion-icon 
-              [name]="isDropdownOpen ? 'chevron-up-outline' : 'chevron-down-outline'" 
-              class="dropdown-icon">
-            </ion-icon>
-          </div>
-          
-          <div class="basic-info-content" *ngIf="isDropdownOpen">
-            <ion-item>
-              <ion-label position="stacked">Phone</ion-label>
-              <ion-input type="tel" [value]="userProfile.phone" readonly></ion-input>
-            </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Name</ion-label>
+            <ion-input [value]="userProfile.name" readonly></ion-input>
+          </ion-item>
 
-            <ion-item>
-              <ion-label position="stacked">Date of Birth</ion-label>
-              <ion-input [value]="userProfile.dob | date" readonly></ion-input>
-            </ion-item>
+          <!-- Basic Info Section with Dropdown -->
+          <div class="basic-info-section" (click)="toggleDropdown()">
+            <div class="basic-info-header">
+              <div class="basic-info-title">More Information</div>
+              <ion-icon 
+                [name]="isDropdownOpen ? 'chevron-up-outline' : 'chevron-down-outline'" 
+                class="dropdown-icon">
+              </ion-icon>
+            </div>
             
-            <ion-item>
-              <ion-label position="stacked">Address</ion-label>
-              <ion-input [value]="userProfile.address" readonly></ion-input>
-            </ion-item>
+            <div class="basic-info-content" *ngIf="isDropdownOpen">
+              <ion-item>
+                <ion-label position="stacked">Phone</ion-label>
+                <ion-input type="tel" [value]="userProfile.phone" readonly></ion-input>
+              </ion-item>
+
+              <ion-item>
+                <ion-label position="stacked">Date of Birth</ion-label>
+                <ion-input [value]="userProfile.dob | date" readonly></ion-input>
+              </ion-item>
+              
+              <ion-item>
+                <ion-label position="stacked">Address</ion-label>
+                <ion-input [value]="userProfile.address" readonly></ion-input>
+              </ion-item>
+            </div>
           </div>
-        </div>      
+        </div>
+        
+        <!-- Edit Mode -->
+        <div *ngIf="isProfileEditMode">
+          <ion-item>
+            <ion-label position="stacked">Email</ion-label>
+            <ion-input type="email" [value]="userProfile.email" readonly></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Name</ion-label>
+            <ion-input [(ngModel)]="tempProfileData.name" placeholder="Enter your name"></ion-input>
+          </ion-item>
+
+          <div class="basic-info-section">
+            <div class="basic-info-header">
+              <div class="basic-info-title">More Information</div>
+            </div>
+            
+            <div class="basic-info-content">
+              <ion-item>
+                <ion-label position="stacked">Phone</ion-label>
+                <ion-input type="tel" [(ngModel)]="tempProfileData.phone" placeholder="Enter your phone number"></ion-input>
+              </ion-item>
+
+              <ion-item>
+                <ion-label position="stacked">Date of Birth</ion-label>
+                <ion-input type="date" [(ngModel)]="tempProfileData.dob"></ion-input>
+              </ion-item>
+              
+              <ion-item>
+                <ion-label position="stacked">Address</ion-label>
+                <ion-input [(ngModel)]="tempProfileData.address" placeholder="Enter your address"></ion-input>
+              </ion-item>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Action buttons -->
+        <div class="action-buttons">
+          <!-- Edit button (shown in view mode) -->
+          <ion-button *ngIf="!isProfileEditMode"
+                    expand="block" fill="outline" color="medium"
+                    (click)="enterProfileEditMode()">
+            <ion-icon slot="start" name="create-outline"></ion-icon>
+            Edit Profile
+          </ion-button>
+          
+          <!-- Cancel button (shown in edit mode) -->
+          <ion-button *ngIf="isProfileEditMode"
+                    expand="block" fill="outline" color="danger"
+                    (click)="cancelProfileEdit()">
+            <ion-icon slot="start" name="close-outline"></ion-icon>
+            Cancel
+          </ion-button>
+          
+          <!-- Save button (shown in edit mode) -->
+          <ion-button *ngIf="isProfileEditMode"
+                    expand="block" fill="solid" color="success"
+                    [disabled]="!hasProfileChanges()"
+                    (click)="saveProfile()">
+            <ion-icon slot="start" name="save-outline"></ion-icon>
+            Save Changes
+          </ion-button>
+        </div>
       </div>
     </div>
   </div>

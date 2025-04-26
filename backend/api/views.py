@@ -122,7 +122,48 @@ def get_profile(request):
     
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-
+@csrf_exempt
+@require_http_methods(["PUT"])
+def update_profile(request):
+    try:
+        data = json.loads(request.body)
+        uid = data.get('uid')
+         
+        if not uid:
+            return JsonResponse({'error': 'UID is required'}, status=400)
+         
+        try:
+            user = User.objects.get(uid=uid)
+             
+            # Update fields if they exist in the request
+            if 'name' in data:
+                user.name = data['name']
+            if 'phone' in data:
+                user.phone = data['phone']
+            if 'dob' in data:
+                user.dob = data['dob']
+            if 'address' in data:
+                user.address = data['address']
+             
+            user.save()
+             
+            return JsonResponse({
+                'uid': user.uid,
+                'name': user.name,
+                'email': user.email,
+                'phone': user.phone,
+                'dob': user.dob,
+                'address': user.address,
+                'role': user.role
+            }, status=200)
+             
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+             
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @csrf_exempt
 @require_http_methods(["GET"])

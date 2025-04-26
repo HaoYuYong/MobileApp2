@@ -31,6 +31,14 @@ export class CompanyprofileComponent implements OnInit {
   isLoading = true;
   errorMessage = '';
   isDropdownOpen = false;
+
+  // Registered data properties
+  isProfileEditMode: boolean = false;
+  tempProfileData: any = {
+    name: '',
+    phone: '',
+    address: ''
+  };
   
   // Job position properties
   jobPositions: any[] = [];
@@ -96,6 +104,60 @@ export class CompanyprofileComponent implements OnInit {
       this.errorMessage = 'User not logged in';
       this.isLoading = false;
     }
+  }
+
+  enterProfileEditMode() {
+    this.isProfileEditMode = true;
+    this.tempProfileData = {
+      name: this.userProfile.name,
+      phone: this.userProfile.phone,
+      address: this.userProfile.address
+    };
+  }
+  
+  cancelProfileEdit() {
+    this.isProfileEditMode = false;
+  }
+  
+  hasProfileChanges(): boolean {
+    return (
+      this.tempProfileData.name !== this.userProfile.name ||
+      this.tempProfileData.phone !== this.userProfile.phone ||
+      this.tempProfileData.address !== this.userProfile.address
+    );
+  }
+  
+  saveProfile() {
+    const userData = sessionStorage.getItem('currentUser');
+    if (!userData) {
+      this.showAlert('Error', 'User not logged in');
+      return;
+    }
+  
+    const user = JSON.parse(userData);
+    const profileData = {
+      uid: user.uid,
+      name: this.tempProfileData.name,
+      phone: this.tempProfileData.phone,
+      address: this.tempProfileData.address
+    };
+  
+    this.profileService.updateProfile(user.uid, profileData).subscribe({
+      next: (response: any) => {
+        this.userProfile = {
+          ...this.userProfile,
+          name: response.name,
+          phone: response.phone,
+          address: response.address
+        };
+        this.isProfileEditMode = false;
+        this.showAlert('Success', 'Profile updated successfully');
+      },
+      error: async (error) => {
+        console.error('Error saving profile:', error);
+        await this.showAlert('Error', 'Failed to update profile');
+      }
+    });
   }
 
   // Basic Info Methods

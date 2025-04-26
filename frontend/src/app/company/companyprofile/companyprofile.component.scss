@@ -93,6 +93,25 @@
         margin-right: 10px;
       }
     }
+
+    .basic-info-content ion-input {
+      color: #333 !important;
+    }
+  }
+
+  /* Ensure action buttons are properly spaced */
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    
+    ion-button {
+      flex: 1;
+      --border-radius: 8px;
+      --padding-top: 15px;
+      --padding-bottom: 15px;
+      font-weight: 500;
+    }
   }
 
   /* Loading spinner */

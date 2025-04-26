@@ -9,7 +9,7 @@ import { AlertController } from '@ionic/angular';
   providedIn: 'root'
 })
 export class CompanyProfileService {
-  private apiUrl = `${environment.apiUrl}/api`;
+  private apiUrl = environment.apiUrl;
   private currentProfileSubject = new BehaviorSubject<any>(null);
   private jobPositionsSubject = new BehaviorSubject<any[]>([]);
   
@@ -22,7 +22,7 @@ export class CompanyProfileService {
   ) {}
 
   fetchProfile(uid: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/get_profile/?uid=${uid}`).pipe(
+    return this.http.get(`${this.apiUrl}/api/get_profile/?uid=${uid}`).pipe(
       tap((profile) => {
         this.currentProfileSubject.next(profile);
       }),
@@ -33,8 +33,20 @@ export class CompanyProfileService {
     );
   }
 
+  updateProfile(uid: string, profileData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/api/profile/update/`, { uid, ...profileData }).pipe(
+      tap((updatedProfile) => {
+        this.currentProfileSubject.next(updatedProfile);
+      }),
+      catchError((error) => {
+        this.showAlert('Update Error', 'Failed to update profile');
+        return throwError(() => error);
+      })
+    );
+  }
+
   fetchJobPositions(uid: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/job-positions/list/?uid=${uid}`).pipe(
+    return this.http.get<any[]>(`${this.apiUrl}/api/job-positions/list/?uid=${uid}`).pipe(
       tap((positions) => {
         this.jobPositionsSubject.next(positions);
       }),
@@ -46,7 +58,7 @@ export class CompanyProfileService {
   }
 
   addJobPosition(positionData: { user: string; position: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/job-positions/`, positionData).pipe(
+    return this.http.post(`${this.apiUrl}/api/job-positions/`, positionData).pipe(
       tap((newPosition) => {
         const currentPositions = this.jobPositionsSubject.value;
         this.jobPositionsSubject.next([...currentPositions, newPosition]);
@@ -59,7 +71,7 @@ export class CompanyProfileService {
   }
 
   deleteJobPosition(positionId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/job-positions/delete/${positionId}/`).pipe(
+    return this.http.delete(`${this.apiUrl}/api/job-positions/delete/${positionId}/`).pipe(
       tap(() => {
         const updatedPositions = this.jobPositionsSubject.value.filter(
           pos => pos.id !== positionId
@@ -74,13 +86,25 @@ export class CompanyProfileService {
   }
 
   getAboutMe(uid: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/about-me/?uid=${uid}`).pipe(
+    return this.http.get(`${this.apiUrl}/api/about-me/?uid=${uid}`).pipe(
       catchError((error) => throwError(() => error))
     );
   }
 
   saveAboutMe(data: { uid: string; about: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/about-me/`, data).pipe(
+    return this.http.post(`${this.apiUrl}/api/about-me/`, data).pipe(
+      catchError((error) => throwError(() => error))
+    );
+  }
+
+  getJobScope(uid: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/job-scope/?uid=${uid}`).pipe(
+      catchError((error) => throwError(() => error))
+    );
+  }
+  
+  saveJobScope(data: { uid: string; scope: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/api/job-scope/`, data).pipe(
       catchError((error) => throwError(() => error))
     );
   }
@@ -92,17 +116,5 @@ export class CompanyProfileService {
       buttons: ['OK']
     });
     await alert.present();
-  }
-
-  getJobScope(uid: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/job-scope/?uid=${uid}`).pipe(
-      catchError((error) => throwError(() => error))
-    );
-  }
-  
-  saveJobScope(data: { uid: string; scope: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/job-scope/`, data).pipe(
-      catchError((error) => throwError(() => error))
-    );
   }
 }

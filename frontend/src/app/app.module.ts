@@ -18,7 +18,7 @@ import { LandingComponent } from './landing/landing.component';
 // Import your company components
 import { CompanyhomeComponent } from './company/companyhome/companyhome.component';
 import { EmpseekComponent } from './company/empseek/empseek.component';
-import { PlatformComponent } from './company/platform/platform.component';
+import { EmpfavouriteComponent } from './company/empfavourite/empfavourite.component';
 import { CompanyprofileComponent } from './company/companyprofile/companyprofile.component';
 
 // Import Angular Modules
@@ -40,7 +40,7 @@ import { provideHttpClient } from '@angular/common/http';
     RegisterComponent,
     CompanyhomeComponent,
     EmpseekComponent,
-    PlatformComponent,
+    EmpfavouriteComponent,
     CompanyprofileComponent,
     LandingComponent
   ],

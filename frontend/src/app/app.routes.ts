@@ -7,7 +7,7 @@ import { EmployeeprofileComponent } from './employee/employeeprofile/employeepro
 //Company
 import { CompanyhomeComponent } from './company/companyhome/companyhome.component';
 import { EmpseekComponent } from './company/empseek/empseek.component';
-import { PlatformComponent } from './company/platform/platform.component';
+import { EmpfavouriteComponent } from './company/empfavourite/empfavourite.component';
 import { CompanyprofileComponent } from './company/companyprofile/companyprofile.component';
 //General
 import { LoginComponent } from './login/login.component';
@@ -33,5 +33,5 @@ export const appRoutes: Routes = [
   { path: 'comp-home', component: CompanyhomeComponent },
   { path: 'comp-empseek', component: EmpseekComponent },
   { path: 'comp-profile', component: CompanyprofileComponent },
-  { path: 'comp-platform', component: PlatformComponent },
+  { path: 'comp-empfavourite', component: EmpfavouriteComponent},
 ];

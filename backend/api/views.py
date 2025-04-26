@@ -815,3 +815,77 @@ def get_employees_with_details(request):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_employee_favourites(request):
+    company_uid = request.GET.get('company_uid')
+    if not company_uid:
+        return JsonResponse({'error': 'company_uid is required'}, status=400)
+    
+    try:
+        favourites = Favourite.objects.filter(company__uid=company_uid).select_related('user')
+        
+        favourite_employees = []
+        for fav in favourites:
+            employee = fav.user
+            positions = JobPosition.objects.filter(user=employee).values('id', 'position')
+            about_info = AboutMe.objects.filter(uid=employee.uid).first()
+            educations = Education.objects.filter(user=employee).order_by('-created_at')
+            experiences = WorkExperience.objects.filter(user=employee).order_by('-created_at')
+            skills = Skills.objects.filter(user=employee).order_by('-created_at')
+            
+            about = about_info.about if about_info else ''
+            about = about.replace('\n', '<br>') if about else ''
+            
+            favourite_employees.append({
+                'uid': employee.uid,
+                'name': employee.name,
+                'email': employee.email,
+                'phone': employee.phone,
+                'positions': list(positions),
+                'about': about,
+                'educations': list(educations.values()),
+                'work_experiences': list(experiences.values()),
+                'skills': list(skills.values())
+            })
+            
+        return JsonResponse(favourite_employees, safe=False)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def toggle_employee_favourite(request):
+    try:
+        data = json.loads(request.body)
+        company_uid = data.get('company_uid')
+        employee_uid = data.get('employee_uid')
+        
+        if not company_uid or not employee_uid:
+            return JsonResponse({'error': 'Both company_uid and employee_uid are required'}, status=400)
+        
+        try:
+            company = User.objects.get(uid=company_uid, role='company')
+            employee = User.objects.get(uid=employee_uid, role='employee')
+            
+            # Check if favourite exists
+            favourite, created = Favourite.objects.get_or_create(
+                user=employee,
+                company=company
+            )
+            
+            if not created:
+                favourite.delete()
+                return JsonResponse({'status': 'removed', 'message': 'Employee removed from favourites'})
+            
+            return JsonResponse({'status': 'added', 'message': 'Employee added to favourites'})
+            
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'Company or Employee not found'}, status=404)
+            
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

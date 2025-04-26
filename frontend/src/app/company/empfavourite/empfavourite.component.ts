@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { EmployeeService } from '../../service/empseek.service';
-import { EmpfavouriteService } from '../../service/empfavourite.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { personOutline, briefcaseOutline, schoolOutline, businessOutline, 
-         mailOutline, callOutline, filterOutline, heartOutline, heart, 
-         closeOutline } from 'ionicons/icons';
+import { personOutline, briefcaseOutline, schoolOutline, businessOutline, mailOutline, callOutline, heart, heartOutline, filterOutline, closeOutline } from 'ionicons/icons';
+import { EmpfavouriteService } from '../../service/empfavourite.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
@@ -25,13 +22,13 @@ interface Employee {
 }
 
 @Component({
-  selector: 'app-empseek',
+  selector: 'app-empfavourite',
   standalone: true,
-  templateUrl: './empseek.component.html',
-  styleUrls: ['./empseek.component.scss'],
+  templateUrl: './empfavourite.component.html',
+  styleUrls: ['./empfavourite.component.scss'],
   imports: [CommonModule, FormsModule, IonicModule]
 })
-export class EmpseekComponent implements OnInit {
+export class EmpfavouriteComponent implements OnInit {
   employees: Employee[] = [];
   filteredEmployees: Employee[] = [];
   isLoading = true;
@@ -41,15 +38,13 @@ export class EmpseekComponent implements OnInit {
   positionOptions: string[] = [];
   showFilterModal = false;
   selectedEmployee: Employee | null = null;
-  isFavorite = false;
 
   constructor(
-    private employeeService: EmployeeService,
     private empfavouriteService: EmpfavouriteService,
     private sanitizer: DomSanitizer,
     private alertController: AlertController,
-    private router: Router,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private router: Router
   ) {
     addIcons({ 
       personOutline, 
@@ -58,18 +53,19 @@ export class EmpseekComponent implements OnInit {
       businessOutline,
       mailOutline,
       callOutline,
-      filterOutline,
-      heartOutline,
       heart,
+      heartOutline,
+      filterOutline,
       closeOutline
     });
   }
 
   ngOnInit() {
-    this.loadEmployees();
+    this.loadFavourites();
   }
 
   private getCurrentCompanyUid(): string | null {
+    // Check sessionStorage for currentUser object first
     const sessionUser = sessionStorage.getItem('currentUser');
     if (sessionUser) {
       try {
@@ -80,6 +76,7 @@ export class EmpseekComponent implements OnInit {
       }
     }
     
+    // Fallback to direct uid storage
     return localStorage.getItem('user_uid') || 
            sessionStorage.getItem('user_uid') || 
            null;
@@ -88,7 +85,7 @@ export class EmpseekComponent implements OnInit {
   private async showLoginAlert() {
     const alert = await this.alertController.create({
       header: 'Login Required',
-      message: 'You need to login to favorite employees.',
+      message: 'You need to login to view favorite employees.',
       buttons: [
         {
           text: 'Cancel',
@@ -105,10 +102,38 @@ export class EmpseekComponent implements OnInit {
     await alert.present();
   }
 
-  loadEmployees() {
+  private async showToast(message: string, isError: boolean = false) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 2000,
+      position: 'bottom',
+      color: isError ? 'danger' : 'success',
+      buttons: [
+        {
+          icon: 'close-outline',
+          role: 'cancel',
+          side: 'end'
+        }
+      ]
+    });
+    await toast.present();
+  }
+
+  loadFavourites() {
     this.isLoading = true;
     this.errorMessage = '';
-    this.employeeService.getEmployees().subscribe({
+    
+    const companyUid = this.getCurrentCompanyUid();
+    console.log('Loading favorites for company:', companyUid);
+    
+    if (!companyUid) {
+      this.errorMessage = 'Company not logged in';
+      this.isLoading = false;
+      this.showLoginAlert();
+      return;
+    }
+    
+    this.empfavouriteService.getFavouriteEmployees(companyUid).subscribe({
       next: (data: Employee[]) => {
         this.employees = data.map(employee => ({
           ...employee,
@@ -119,14 +144,15 @@ export class EmpseekComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        this.errorMessage = 'Failed to load employees. Please try again later.';
+        this.errorMessage = 'Failed to load favourite employees. Please try again later.';
         this.isLoading = false;
-        console.error('Error loading employees:', err);
+        console.error('Error loading favourites:', err);
+        this.showToast(this.errorMessage, true);
       }
     });
   }
 
-  async toggleFavorite() {
+  async removeFromFavorites() {
     if (!this.selectedEmployee) return;
     
     const companyUid = this.getCurrentCompanyUid();
@@ -136,63 +162,18 @@ export class EmpseekComponent implements OnInit {
     }
     
     try {
-      const response = await this.empfavouriteService.toggleEmployeeFavourite(
-        companyUid, 
-        this.selectedEmployee.uid
-      ).toPromise();
+      await this.empfavouriteService.toggleEmployeeFavourite(companyUid, this.selectedEmployee.uid).toPromise();
+      // Remove from local lists
+      this.employees = this.employees.filter(e => e.uid !== this.selectedEmployee?.uid);
+      this.filteredEmployees = this.filteredEmployees.filter(e => e.uid !== this.selectedEmployee?.uid);
       
-      this.isFavorite = response.status === 'added';
+      // Show success toast
+      await this.showToast('Employee removed from favorites');
       
-      const toast = await this.toastController.create({
-        message: this.isFavorite 
-          ? 'Employee added to favorites' 
-          : 'Employee removed from favorites',
-        duration: 2000,
-        position: 'bottom',
-        color: 'success',
-        buttons: [
-          {
-            icon: 'close-outline',
-            role: 'cancel'
-          }
-        ]
-      });
-      await toast.present();
+      this.selectedEmployee = null;
     } catch (err) {
-      console.error('Error toggling favorite:', err);
-      const toast = await this.toastController.create({
-        message: 'Failed to update favorite. Please try again.',
-        duration: 2000,
-        position: 'bottom',
-        color: 'danger',
-        buttons: [
-          {
-            icon: 'close-outline',
-            role: 'cancel'
-          }
-        ]
-      });
-      await toast.present();
-    }
-  }
-
-  selectEmployee(employee: Employee) {
-    this.selectedEmployee = {
-      ...employee,
-      formattedAbout: this.formatAbout(employee.about)
-    };
-    
-    const companyUid = this.getCurrentCompanyUid();
-    if (companyUid) {
-      this.empfavouriteService.getFavouriteEmployees(companyUid).subscribe({
-        next: (favorites) => {
-          this.isFavorite = favorites.some(fav => fav.uid === employee.uid);
-        },
-        error: (err) => {
-          console.error('Error checking favorites:', err);
-          this.isFavorite = false;
-        }
-      });
+      console.error('Error removing favorite:', err);
+      await this.showToast('Failed to remove from favorites. Please try again.', true);
     }
   }
 
@@ -245,6 +226,13 @@ export class EmpseekComponent implements OnInit {
     this.selectedEmployee = null;
     this.filteredEmployees = [...this.employees];
     this.showFilterModal = false;
+  }
+
+  selectEmployee(employee: Employee) {
+    this.selectedEmployee = {
+      ...employee,
+      formattedAbout: this.formatAbout(employee.about)
+    };
   }
 
   hasPositions(employee: Employee): boolean {

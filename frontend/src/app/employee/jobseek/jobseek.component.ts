@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { JobSeekService } from '../../service/jobseek.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { businessOutline, briefcaseOutline, informationCircleOutline, searchOutline, filterOutline, heartOutline, heart, mailOutline, callOutline } from 'ionicons/icons';
+import { businessOutline, briefcaseOutline, informationCircleOutline, searchOutline, filterOutline, heartOutline, heart, mailOutline, callOutline, closeOutline } from 'ionicons/icons';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FavouriteService } from '../../service/favourite.service';
 import { Router } from '@angular/router';
@@ -46,7 +46,8 @@ export class JobseekComponent implements OnInit {
     private favouriteService: FavouriteService,
     private sanitizer: DomSanitizer,
     private alertController: AlertController,
-    private router: Router
+    private router: Router,
+    private toastController: ToastController
   ) {
     addIcons({ 
       businessOutline, 
@@ -57,7 +58,8 @@ export class JobseekComponent implements OnInit {
       heartOutline,
       heart,
       mailOutline,
-      callOutline
+      callOutline,
+      closeOutline
     });
   }
 
@@ -66,7 +68,6 @@ export class JobseekComponent implements OnInit {
   }
 
   private getCurrentUserUid(): string | null {
-    // Check sessionStorage for currentUser object first
     const sessionUser = sessionStorage.getItem('currentUser');
     if (sessionUser) {
       try {
@@ -77,7 +78,6 @@ export class JobseekComponent implements OnInit {
       }
     }
     
-    // Fallback to direct uid storage
     return localStorage.getItem('user_uid') || 
            sessionStorage.getItem('user_uid') || 
            null;
@@ -107,10 +107,7 @@ export class JobseekComponent implements OnInit {
     if (!this.selectedCompany) return;
     
     const userUid = this.getCurrentUserUid();
-    console.log('Current User UID:', userUid); // Debug log
-    
     if (!userUid) {
-      console.log('No user UID found, showing login alert');
       await this.showLoginAlert();
       return;
     }
@@ -118,14 +115,37 @@ export class JobseekComponent implements OnInit {
     try {
       const response = await this.favouriteService.toggleFavourite(userUid, this.selectedCompany.uid).toPromise();
       this.isFavorite = response.status === 'added';
+      
+      const toast = await this.toastController.create({
+        message: this.isFavorite 
+          ? 'Company added to favorites' 
+          : 'Company removed from favorites',
+        duration: 2000,
+        position: 'bottom',
+        color: 'success',
+        buttons: [
+          {
+            icon: 'close-outline',
+            role: 'cancel'
+          }
+        ]
+      });
+      await toast.present();
     } catch (err) {
       console.error('Error toggling favorite:', err);
-      const alert = await this.alertController.create({
-        header: 'Error',
+      const toast = await this.toastController.create({
         message: 'Failed to update favorite. Please try again.',
-        buttons: ['OK']
+        duration: 2000,
+        position: 'bottom',
+        color: 'danger',
+        buttons: [
+          {
+            icon: 'close-outline',
+            role: 'cancel'
+          }
+        ]
       });
-      await alert.present();
+      await toast.present();
     }
   }
 

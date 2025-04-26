@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { businessOutline, briefcaseOutline, mailOutline, callOutline, heart, heartOutline, filterOutline  } from 'ionicons/icons';
+import { businessOutline, briefcaseOutline, mailOutline, callOutline, heart, heartOutline, filterOutline, closeOutline } from 'ionicons/icons';
 import { FavouriteService } from '../../service/favourite.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -43,7 +43,8 @@ export class FavouriteComponent implements OnInit {
     private favouriteService: FavouriteService,
     private sanitizer: DomSanitizer,
     private alertController: AlertController,
-    private router: Router
+    private router: Router,
+    private toastController: ToastController
   ) {
     addIcons({ 
       businessOutline, 
@@ -52,7 +53,8 @@ export class FavouriteComponent implements OnInit {
       callOutline,
       heart,
       heartOutline,
-      filterOutline 
+      filterOutline,
+      closeOutline
     });
   }
 
@@ -61,7 +63,6 @@ export class FavouriteComponent implements OnInit {
   }
 
   private getCurrentUserUid(): string | null {
-    // Check sessionStorage for currentUser object first
     const sessionUser = sessionStorage.getItem('currentUser');
     if (sessionUser) {
       try {
@@ -72,7 +73,6 @@ export class FavouriteComponent implements OnInit {
       }
     }
     
-    // Fallback to direct uid storage
     return localStorage.getItem('user_uid') || 
            sessionStorage.getItem('user_uid') || 
            null;
@@ -103,7 +103,6 @@ export class FavouriteComponent implements OnInit {
     this.errorMessage = '';
     
     const userUid = this.getCurrentUserUid();
-    console.log('Loading favorites for user:', userUid); // Debug log
     
     if (!userUid) {
       this.errorMessage = 'User not logged in';
@@ -142,18 +141,42 @@ export class FavouriteComponent implements OnInit {
     
     try {
       await this.favouriteService.toggleFavourite(userUid, this.selectedCompany.uid).toPromise();
+      
       // Remove from local lists
       this.companies = this.companies.filter(c => c.uid !== this.selectedCompany?.uid);
       this.filteredCompanies = this.filteredCompanies.filter(c => c.uid !== this.selectedCompany?.uid);
+      
+      // Show success toast
+      const toast = await this.toastController.create({
+        message: 'Company removed from favorites',
+        duration: 2000,
+        position: 'bottom',
+        color: 'success',
+        buttons: [
+          {
+            icon: 'close-outline',
+            role: 'cancel'
+          }
+        ]
+      });
+      await toast.present();
+      
       this.selectedCompany = null;
     } catch (err) {
       console.error('Error removing favorite:', err);
-      const alert = await this.alertController.create({
-        header: 'Error',
+      const toast = await this.toastController.create({
         message: 'Failed to remove from favorites. Please try again.',
-        buttons: ['OK']
+        duration: 2000,
+        position: 'bottom',
+        color: 'danger',
+        buttons: [
+          {
+            icon: 'close-outline',
+            role: 'cancel'
+          }
+        ]
       });
-      await alert.present();
+      await toast.present();
     }
   }
 

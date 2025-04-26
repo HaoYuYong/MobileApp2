@@ -192,6 +192,17 @@ ion-item {
           padding-right: 16px; 
         }
 
+        .favorite-btn {
+          --padding-start: 0;
+          --padding-end: 0;
+          margin-left: auto; 
+          
+          ion-icon {
+            font-size: 24px;
+            color: var(--ion-color-danger);
+          }
+        }
+
         &::after {
           content: "";
           position: absolute;
@@ -294,36 +305,6 @@ ion-modal {
     }
   }
 }
-
-/* Toast Notifications */
-.custom-toast {
-    --background: #4CAF50; /* Green background for success */
-    --color: white;
-    --border-radius: 8px;
-    --button-color: white;
-  }
-  
-  .error-toast {
-    --background: #F44336; /* Red background for error */
-    --color: white;
-    --border-radius: 8px;
-    --button-color: white;
-  }
-  
-  /* For Ionic 6+ */
-  ion-toast.custom-toast {
-    --background: #4CAF50;
-    --color: white;
-    --border-radius: 8px;
-    --button-color: white;
-  }
-  
-  ion-toast.error-toast {
-    --background: #F44336;
-    --color: white;
-    --border-radius: 8px;
-    --button-color: white;
-  }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

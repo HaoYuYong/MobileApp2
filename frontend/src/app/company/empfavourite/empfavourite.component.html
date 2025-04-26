@@ -1,7 +1,7 @@
 <ion-content>
   <ion-header>
     <ion-toolbar color="primary">
-      <ion-title>Employee Seek</ion-title>
+      <ion-title>Favourite Employees</ion-title>
       <ion-buttons slot="end">
         <ion-button (click)="showFilterModal = true" fill="clear">
           <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
@@ -23,7 +23,7 @@
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container">
     <ion-spinner name="crescent"></ion-spinner>
-    <p>Loading employees...</p>
+    <p>Loading favourite employees...</p>
   </div>
 
   <!-- Error State -->
@@ -33,16 +33,16 @@
     </ion-card-header>
     <ion-card-content>
       {{ errorMessage }}
-      <ion-button expand="block" (click)="loadEmployees()">Retry</ion-button>
+      <ion-button expand="block" (click)="loadFavourites()">Retry</ion-button>
     </ion-card-content>
   </ion-card>
 
   <!-- Empty State -->
   <div *ngIf="!isLoading && !errorMessage && filteredEmployees.length === 0" class="no-selection">
-    <ion-icon name="people-outline"></ion-icon>
-    <h3>No Employees Found</h3>
+    <ion-icon name="heart-outline"></ion-icon>
+    <h3>No Favourite Employees</h3>
     <p *ngIf="searchTerm || selectedPosition">Try adjusting your search or filters</p>
-    <p *ngIf="!searchTerm && !selectedPosition">There are currently no employees available.</p>
+    <p *ngIf="!searchTerm && !selectedPosition">You haven't marked any employees as favorite yet.</p>
     <ion-button (click)="clearFilters()">Clear Filters</ion-button>
   </div>
 
@@ -81,9 +81,8 @@
             <ion-card-title>
               <div class="title-row">
                 <span class="employee-name">{{ selectedEmployee.name }}</span>
-                <ion-button fill="clear" class="favorite-btn" (click)="toggleFavorite()">
-                  <ion-icon [name]="isFavorite ? 'heart' : 'heart-outline'" 
-                            [color]="isFavorite ? 'danger' : 'medium'"></ion-icon>
+                <ion-button fill="clear" class="favorite-btn" (click)="removeFromFavorites()">
+                  <ion-icon name="heart" color="danger"></ion-icon>
                 </ion-button>
               </div>
             </ion-card-title>
@@ -105,7 +104,7 @@
             <!-- About The Employee -->
             <div *ngIf="hasAbout(selectedEmployee)" class="section">
               <ion-list-header>
-                <ion-label>About me</ion-label>
+                <ion-label>About</ion-label>
               </ion-list-header>
               
               <div class="about-content" [innerHTML]="getSafeHtml(selectedEmployee.formattedAbout)"></div>

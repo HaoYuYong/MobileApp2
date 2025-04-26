@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { PlatformComponent } from './platform.component';
+import { EmpfavouriteComponent } from './empfavourite.component';
 
 describe('PlatformComponent', () => {
-  let component: PlatformComponent;
-  let fixture: ComponentFixture<PlatformComponent>;
+  let component: EmpfavouriteComponent;
+  let fixture: ComponentFixture<EmpfavouriteComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ PlatformComponent ],
+      declarations: [ EmpfavouriteComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(PlatformComponent);
+    fixture = TestBed.createComponent(EmpfavouriteComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

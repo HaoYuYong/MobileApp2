@@ -1,23 +1,4 @@
-// @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-// ion-header {
-//     ion-toolbar {
-//       &:first-child {
-//         background-color: brown;
-//         color: white;
-//       }
-  
-//       &:last-child {
-//         background-color: grey;
-//       }
-  
-//       ion-button {
-//         color: white;
-//       }
-//     }
-//   }
-  
-
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
 ion-header {
   ion-toolbar {
@@ -25,12 +6,12 @@ ion-header {
       background-color: #9b59b6;
       color: white;
       padding: 10px;
-      
+
       ion-title {
         font-size: 1.2rem;
         font-weight: 500;
       }
-      
+
       ion-button {
         font-size: 1rem;
         --padding-start: 16px;
@@ -41,23 +22,23 @@ ion-header {
       }
     }
 
-    &:last-child {
+    &.desktop-nav {
       background-color: #71b7e6;
       min-height: 60px;
-      
+
       ion-buttons[slot="start"] {
         display: flex;
         width: 100%;
         justify-content: space-around;
         padding: 10px 15px;
-        
+
         ion-button {
           --padding-top: 12px;
           --padding-bottom: 12px;
           --padding-start: 20px;
           --padding-end: 20px;
           --border-radius: 6px;
-          
+
           font-size: 1.1rem;
           font-weight: 500;
           color: white;
@@ -68,84 +49,101 @@ ion-header {
           max-width: 150px;
 
           &:hover {
-            --background: rgba(255,255,255,0.1);
+            --background: rgba(255, 255, 255, 0.1);
           }
 
           &.active {
-            --background: rgba(255,255,255,0.2);
+            --background: rgba(255, 255, 255, 0.2);
             font-weight: 600;
           }
+
+          ion-icon {
+            margin-right: 8px;
+          }
         }
       }
     }
   }
 }
 
-/* Mobile styles - specifically for navigation bar */
+/* Mobile Bottom Navigation */
+.mobile-nav-container {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
+  background: #71b7e6;
+}
+
+.mobile-nav {
+  --background: var(--ion-color-tertiary, #6030ff) !important;
+  --border: none;
+  padding: 0;
+  height: 68px;
+  display: flex;
+  justify-content: space-around;
+
+  ion-tab-button {
+    --color: rgba(255, 255, 255, 0.7);
+    --color-selected: white;
+    --background: transparent;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    min-width: 80px;
+    max-width: 100px;
+
+    ion-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    ion-label {
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
+}
+
+/* Mobile styles */
 @media (max-width: 768px) {
+  .desktop-nav {
+    display: none !important;
+  }
+
+  .mobile-nav-container {
+    display: block;
+  }
+
+  /* Add safe area for content */
+  :host {
+    --mobile-nav-height: 60px;
+  }
+
+  /* Apply padding to the main content area */
+  ion-router-outlet {
+    padding-bottom: var(--mobile-nav-height) !important;
+  }
+
+  /* Ensure the mobile nav stays fixed */
+  .mobile-nav-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: var(--mobile-nav-height);
+  }
+
   ion-header {
     ion-toolbar {
-      &:last-child {
-        min-height: 70px;
-        
-        ion-buttons[slot="start"] {
-          padding: 12px;
-          justify-content: flex-start;
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-          gap: 10px;
-          
-          &::-webkit-scrollbar {
-            display: none;
-          }
-
-          ion-button {
-            --padding-top: 15px;
-            --padding-bottom: 15px;
-            --padding-start: 25px;
-            --padding-end: 25px;
-            font-size: 1.2rem;
-            height: 55px;
-            flex: 0 0 auto;
-            min-width: auto;
-            max-width: none;
-            
-            &::part(native) {
-              padding: 0 15px;
-            }
-          }
+      &:first-child {
+        ion-title {
+          font-size: 1.1rem;
         }
       }
     }
   }
 }
-
-/* Small mobile styles */
-@media (max-width: 480px) {
-  ion-header {
-    ion-toolbar {
-      &:last-child {
-        min-height: 75px;
-        
-        ion-buttons[slot="start"] {
-          padding: 15px 10px;
-          
-          ion-button {
-            --padding-top: 18px;
-            --padding-bottom: 18px;
-            --padding-start: 30px;
-            --padding-end: 30px;
-            height: 60px;
-            font-size: 1.25rem;
-            
-            &::part(native) {
-              padding: 0 20px;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-

@@ -106,7 +106,7 @@ export class EmpfavouriteComponent implements OnInit {
     const toast = await this.toastController.create({
       message: message,
       duration: 2000,
-      position: 'bottom',
+      position: 'top',
       color: isError ? 'danger' : 'success',
       buttons: [
         {
@@ -114,7 +114,8 @@ export class EmpfavouriteComponent implements OnInit {
           role: 'cancel',
           side: 'end'
         }
-      ]
+      ],
+        cssClass: 'top-toast'
     });
     await toast.present();
   }

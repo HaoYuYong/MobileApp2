@@ -34,4 +34,25 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+@import "@ionic/angular/css/palettes/dark.system.css";
+
+/* Global Styles for Mobile Bottom Nav */
+@media (max-width: 768px) {
+  /* Add padding to prevent content overlap */
+  ion-content {
+    --padding-bottom: 50px !important;
+  }
+
+  /* Ensure header stays at top */
+  app-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  /* Style for content container */
+  .content-container {
+    min-height: calc(100vh - 60px); /* Adjust based on your header height */
+    padding-bottom: 50px; /* Same as nav height */
+  }
+}

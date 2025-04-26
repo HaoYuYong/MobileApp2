@@ -121,14 +121,15 @@ export class JobseekComponent implements OnInit {
           ? 'Company added to favorites' 
           : 'Company removed from favorites',
         duration: 2000,
-        position: 'bottom',
+        position: 'top',
         color: 'success',
         buttons: [
           {
             icon: 'close-outline',
             role: 'cancel'
           }
-        ]
+        ],
+        cssClass: 'top-toast'
       });
       await toast.present();
     } catch (err) {

@@ -2,35 +2,115 @@
   <ion-toolbar color="tertiary">
     <ion-title>Search Job</ion-title>
     @if (isLoggedIn) {
-      <ion-buttons slot="end">
-        <ion-button (click)="logout()">Logout</ion-button>
-      </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">Logout</ion-button>
+    </ion-buttons>
     }
   </ion-toolbar>
 </ion-header>
 
-<ion-toolbar color="medium">
+<!-- Desktop Navigation -->
+<ion-toolbar color="medium" class="desktop-nav">
   <ion-buttons slot="start">
-    <!-- General Links (always visible) -->
+    <!-- Normal Links (always visible) -->
     @if (!isLoggedIn) {
-      <ion-button routerLink="/homepage">Home Page</ion-button>
-      <ion-button routerLink="/login">Login/Register</ion-button>
-    }
-
+    <ion-button routerLink="/homepage">
+      <ion-icon slot="start" name="home-outline"></ion-icon>
+      Home Page
+    </ion-button>
+    <ion-button routerLink="/login">
+      <ion-icon slot="start" name="log-in-outline"></ion-icon>
+      Login/Register
+    </ion-button>
     <!-- Employee Links -->
-    @if (userRole === 'employee') {
-      <ion-button routerLink="/emp-home">Home</ion-button>
-      <ion-button routerLink="/emp-jobseek">Job Search</ion-button>
-      <ion-button routerLink="/emp-favourite">Favourite</ion-button>
-      <ion-button routerLink="/emp-profile">Profile</ion-button>
-    }
-
+    } @if (userRole === 'employee') {
+    <ion-button routerLink="/emp-home">
+      <ion-icon slot="start" name="home-outline"></ion-icon>
+      Home
+    </ion-button>
+    <ion-button routerLink="/emp-jobseek">
+      <ion-icon slot="start" name="search-outline"></ion-icon>
+      Job Search
+    </ion-button>
+    <ion-button routerLink="/emp-favourite">
+      <ion-icon slot="start" name="heart-outline"></ion-icon>
+      Favourite
+    </ion-button>
+    <ion-button routerLink="/emp-profile">
+      <ion-icon slot="start" name="person-outline"></ion-icon>
+      Profile
+    </ion-button>
     <!-- Company Links -->
-    @if (userRole === 'company') {
-      <ion-button routerLink="/comp-home">Home</ion-button>
-      <ion-button routerLink="/comp-empseek">Find Employees</ion-button>
-      <ion-button routerLink="/comp-empfavourite">Favourite</ion-button>
-      <ion-button routerLink="/comp-profile">Profile</ion-button>
+    } @if (userRole === 'company') {
+    <ion-button routerLink="/comp-home">
+      <ion-icon slot="start" name="home-outline"></ion-icon>
+      Home
+    </ion-button>
+    <ion-button routerLink="/comp-empseek">
+      <ion-icon slot="start" name="search-outline"></ion-icon>
+      Find Employees
+    </ion-button>
+    <ion-button routerLink="/comp-empfavourite">
+      <ion-icon slot="start" name="heart-outline"></ion-icon>
+      Favourite
+    </ion-button>
+    <ion-button routerLink="/comp-profile">
+      <ion-icon slot="start" name="person-outline"></ion-icon>
+      Profile
+    </ion-button>
     }
   </ion-buttons>
 </ion-toolbar>
+
+<!-- Mobile Bottom Navigation -->
+<div class="mobile-nav-container">
+  <ion-tab-bar class="mobile-nav">
+    <!-- Normal Links (always visible) -->
+    @if (!isLoggedIn) {
+    <ion-tab-button tab="homepage" routerLink="/homepage">
+      <ion-icon name="home-outline"></ion-icon>
+      <ion-label>Home</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="login" routerLink="/login">
+      <ion-icon name="log-in-outline"></ion-icon>
+      <ion-label>Login</ion-label>
+    </ion-tab-button>
+    <!-- Employee Links -->
+    } @if (userRole === 'employee') {
+    <ion-tab-button tab="emp-home" routerLink="/emp-home">
+      <ion-icon name="home-outline"></ion-icon>
+      <ion-label>Home</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="emp-jobseek" routerLink="/emp-jobseek">
+      <ion-icon name="search-outline"></ion-icon>
+      <ion-label>Jobs</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="emp-favourite" routerLink="/emp-favourite">
+      <ion-icon name="heart-outline"></ion-icon>
+      <ion-label>Favorites</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="emp-profile" routerLink="/emp-profile">
+      <ion-icon name="person-outline"></ion-icon>
+      <ion-label>Profile</ion-label>
+    </ion-tab-button>
+    <!-- Company Links -->
+    } @if (userRole === 'company') {
+    <ion-tab-button tab="comp-home" routerLink="/comp-home">
+      <ion-icon name="home-outline"></ion-icon>
+      <ion-label>Home</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="comp-empseek" routerLink="/comp-empseek">
+      <ion-icon name="search-outline"></ion-icon>
+      <ion-label>Search</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="comp-empfavourite" routerLink="/comp-empfavourite">
+      <ion-icon name="heart-outline"></ion-icon>
+      <ion-label>Favorites</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="comp-profile" routerLink="/comp-profile">
+      <ion-icon name="person-outline"></ion-icon>
+      <ion-label>Profile</ion-label>
+    </ion-tab-button>
+    }
+  </ion-tab-bar>
+</div>

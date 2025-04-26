@@ -1,12 +1,12 @@
 /* Importing Google Fonts - Poppins */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
 /* Apply to the host component */
 :host {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   display: block;
   height: 100%;
-  
+
   ion-content {
     --background: linear-gradient(135deg, #71b7e6, #9b59b6);
     --padding-start: 20px;
@@ -166,39 +166,39 @@
   border-radius: 10px;
   margin-bottom: 20px;
   overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
-  
+
   .basic-info-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
     cursor: pointer;
-    
+
     .basic-info-title {
       font-weight: 600;
       color: #333;
       font-size: 1.1rem;
     }
-    
+
     .dropdown-icon {
       font-size: 1.2rem;
       color: #666;
       transition: transform 0.3s ease;
     }
   }
-  
+
   .basic-info-content {
     padding: 0 15px 15px;
-    
+
     ion-item {
       --background: transparent;
       --border-color: #e0e0e0;
       --padding-start: 0;
       --inner-padding-end: 0;
       margin-bottom: 10px;
-      
+
       &:last-child {
         margin-bottom: 0;
       }
@@ -209,10 +209,10 @@
 /* Job Position Container Styles */
 .job-position-container {
   margin-top: 30px;
-  
+
   .job-position-content {
     padding: 15px;
-    
+
     .empty-state {
       text-align: center;
       padding: 20px;
@@ -220,12 +220,12 @@
       font-style: italic;
       margin-bottom: 20px;
     }
-    
+
     .positions-list {
       margin-bottom: 20px;
       border-radius: 8px;
       overflow: hidden;
-      
+
       .position-item {
         display: flex;
         align-items: center;
@@ -234,23 +234,23 @@
         margin-bottom: 8px;
         border-radius: 8px;
         transition: all 0.2s ease;
-        
+
         &:last-child {
           margin-bottom: 0;
         }
-        
+
         .position-icon {
           margin-right: 12px;
           color: #9b59b6;
           font-size: 18px;
         }
-        
+
         .position-text {
           flex: 1;
           color: #333;
           font-weight: 500;
         }
-        
+
         .delete-icon {
           color: #e74c3c;
           font-size: 18px;
@@ -259,10 +259,10 @@
         }
       }
     }
-    
+
     .add-button-container {
       margin-top: 15px;
-      
+
       ion-button {
         --border-radius: 8px;
         --padding-top: 15px;
@@ -276,11 +276,11 @@
 /* About Me Section */
 .about-me-container {
   margin-top: 30px;
-  
+
   .about-me-content {
     padding: 15px;
     text-align: justify;
-    
+
     .about-me-view {
       .about-me-text {
         white-space: pre-line;
@@ -289,7 +289,7 @@
         margin-bottom: 20px;
       }
     }
-    
+
     .about-me-edit {
       ion-textarea {
         --color: #000000;
@@ -305,12 +305,12 @@
         color: #000000 !important;
       }
     }
-    
+
     .action-buttons {
       display: flex;
       gap: 10px;
       margin-top: 15px;
-      
+
       ion-button {
         flex: 1;
         --border-radius: 8px;
@@ -325,38 +325,56 @@
 /* Position Modal (keep existing but ensure consistency) */
 .add-position-modal {
   position: fixed;
-  bottom: 0;
   left: 0;
   right: 0;
   background: white;
-  border-radius: 16px 16px 0 0;
   padding: 20px;
-  z-index: 1001;
-  max-height: 50vh;
+  z-index: 1002;
   overflow-y: auto;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-  animation: slideUp 0.3s ease-out;
-  
+
+  /* Desktop Styles - Centered with no animation */
+  @media (min-width: 769px) {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 500px;
+    width: 90%;
+    border-radius: 16px;
+    max-height: 80vh;
+    animation: none; /* Remove animation for desktop */
+  }
+
+  /* Mobile Styles - Slide up from bottom */
+  @media (max-width: 768px) {
+    bottom: 60px;
+    left: 0;
+    right: 0;
+    border-radius: 16px 16px 0 0;
+    max-height: calc(80vh - 60px);
+    animation: slideUp 0.3s ease-out;
+  }
+
   .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    
+
     h3 {
       margin: 0;
       font-size: 1.2rem;
       font-weight: 600;
       color: #333;
     }
-    
+
     ion-icon {
       font-size: 1.5rem;
       color: #666;
       cursor: pointer;
     }
   }
-  
+
   .modal-content {
     ion-item {
       --background: transparent;
@@ -364,16 +382,16 @@
       --padding-start: 0;
       --inner-padding-end: 0;
       margin-bottom: 15px;
-      color:black;
+      color: black;
     }
   }
-  
+
   .modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     margin-top: 20px;
-    
+
     ion-button {
       --border-radius: 6px;
       --padding-start: 20px;
@@ -382,13 +400,36 @@
   }
 }
 
-/* Animation for modals */
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
+/* Only define slideUp animation for mobile */
+@media (max-width: 768px) {
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
-  to {
-    transform: translateY(0);
+}
+
+/* Modal Backdrop - Responsive Styles */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  backdrop-filter: blur(2px);
+
+  /* Mobile Styles */
+  @media (max-width: 768px) {
+    bottom: 60px; /* Extend to top of nav bar */
+  }
+
+  /* Desktop Styles */
+  @media (min-width: 769px) {
+    bottom: 0;
   }
 }
 
@@ -409,7 +450,8 @@ ion-card {
   margin-top: 16px;
 }
 
-.add-form, .edit-form {
+.add-form,
+.edit-form {
   padding: 16px;
   border: 1px solid var(--ion-color-light);
   border-radius: 8px;
@@ -429,11 +471,11 @@ ion-button {
 /* Job Scope Section */
 .job-scope-container {
   margin-top: 30px;
-  
+
   .job-scope-content {
     padding: 15px;
     text-align: justify;
-    
+
     .job-scope-view {
       .job-scope-text {
         white-space: pre-line;
@@ -442,7 +484,7 @@ ion-button {
         margin-bottom: 20px;
       }
     }
-    
+
     .job-scope-edit {
       ion-textarea {
         --color: #000000;
@@ -458,12 +500,12 @@ ion-button {
         color: #000000 !important;
       }
     }
-    
+
     .action-buttons {
       display: flex;
       gap: 10px;
       margin-top: 15px;
-      
+
       ion-button {
         flex: 1;
         --border-radius: 8px;

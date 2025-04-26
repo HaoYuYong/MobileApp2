@@ -148,14 +148,15 @@ export class EmpseekComponent implements OnInit {
           ? 'Employee added to favorites' 
           : 'Employee removed from favorites',
         duration: 2000,
-        position: 'bottom',
+        position: 'top',
         color: 'success',
         buttons: [
           {
             icon: 'close-outline',
             role: 'cancel'
           }
-        ]
+        ],
+        cssClass: 'top-toast'
       });
       await toast.present();
     } catch (err) {

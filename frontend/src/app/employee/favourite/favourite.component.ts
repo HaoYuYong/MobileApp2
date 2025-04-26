@@ -150,14 +150,15 @@ export class FavouriteComponent implements OnInit {
       const toast = await this.toastController.create({
         message: 'Company removed from favorites',
         duration: 2000,
-        position: 'bottom',
+        position: 'top',
         color: 'success',
         buttons: [
           {
             icon: 'close-outline',
             role: 'cancel'
           }
-        ]
+        ],
+        cssClass: 'top-toast'
       });
       await toast.present();
       

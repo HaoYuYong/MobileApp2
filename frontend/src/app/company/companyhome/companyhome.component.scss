@@ -1,0 +1,100 @@
+/* Importing Google Fonts - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* Apply to the host component */
+:host {
+  font-family: 'Poppins', sans-serif;
+  display: block;
+  height: 100%;
+  
+  ion-content {
+    --background: linear-gradient(135deg, #71b7e6, #9b59b6);
+    --padding-start: 20px;
+    --padding-end: 20px;
+    --padding-top: 20px;
+    --padding-bottom: 20px;
+  }
+}
+
+/* Container styles */
+.container {
+  max-width: 800px;
+  width: calc(100% - 40px);
+  background-color: #fff;
+  padding: 25px 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  position: relative;
+
+  /* Title styles */
+  .title {
+    font-size: 24px;
+    font-weight: 600;
+    position: relative;
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: -8px;
+      height: 3px;
+      width: 30px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, #71b7e6, #9b59b6);
+    }
+  }
+
+  /* Content styles */
+  .content {
+    p {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      text-align: justify;
+    }
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  :host {
+    ion-content {
+      --padding-start: 15px;
+      --padding-end: 15px;
+      --padding-top: 15px;
+      --padding-bottom: 15px;
+    }
+  }
+
+  .container {
+    width: calc(100% - 30px);
+    padding: 20px;
+    margin: 15px auto;
+  }
+}
+
+@media (max-width: 480px) {
+  :host {
+    ion-content {
+      --padding-start: 10px;
+      --padding-end: 10px;
+      --padding-top: 10px;
+      --padding-bottom: 10px;
+    }
+  }
+
+  .container {
+    width: calc(100% - 20px);
+    padding: 15px;
+    margin: 10px auto;
+
+    .title {
+      font-size: 20px;
+    }
+  }
+}

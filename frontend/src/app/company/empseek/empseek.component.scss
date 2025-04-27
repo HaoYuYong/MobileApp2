@@ -77,6 +77,20 @@
 .main-content {
   display: flex;
   height: calc(100% - 72px);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    height: auto;
+
+    .employee-list-column {
+      width: 100%;
+      border-right: none;
+    }
+
+    .details-column {
+      display: none; /* Hide details column on mobile */
+    }
+  }
 }
 
 /* Columns */
@@ -295,35 +309,30 @@ ion-modal {
   }
 }
 
-/* Toast Notifications */
-.custom-toast {
-    --background: #4CAF50; /* Green background for success */
-    --color: white;
-    --border-radius: 8px;
-    --button-color: white;
+/* Add pagination styles */
+.pagination-controls {
+  --background: transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+
+  .page-info {
+    font-size: 14px;
+    color: white;
   }
-  
-  .error-toast {
-    --background: #F44336; /* Red background for error */
+
+  ion-button {
     --color: white;
-    --border-radius: 8px;
-    --button-color: white;
+    --background-activated: rgba(25, 118, 210, 0.1);
+
+    &[disabled] {
+      --color: #999;
+      opacity: 0.5;
+    }
   }
-  
-  /* For Ionic 6+ */
-  ion-toast.custom-toast {
-    --background: #4CAF50;
-    --color: white;
-    --border-radius: 8px;
-    --button-color: white;
-  }
-  
-  ion-toast.error-toast {
-    --background: #F44336;
-    --color: white;
-    --border-radius: 8px;
-    --button-color: white;
-  }
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

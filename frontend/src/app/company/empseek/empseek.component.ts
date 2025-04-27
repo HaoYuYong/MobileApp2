@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { EmployeeService } from '../../service/empseek.service';
 import { EmpfavouriteService } from '../../service/empfavourite.service';
 import { CommonModule } from '@angular/common';
@@ -42,6 +42,11 @@ export class EmpseekComponent implements OnInit {
   showFilterModal = false;
   selectedEmployee: Employee | null = null;
   isFavorite = false;
+  // Pagination properties
+  currentPage = 1;
+  itemsPerPage = 6;
+  paginatedEmployees: Employee[] = [];
+  totalPages = 1;
 
   constructor(
     private employeeService: EmployeeService,
@@ -67,6 +72,23 @@ export class EmpseekComponent implements OnInit {
 
   ngOnInit() {
     this.loadEmployees();
+    this.setupResponsiveLayout();
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.setupResponsiveLayout();
+  }
+
+  private setupResponsiveLayout() {
+    if (this.isMobileView() && this.selectedEmployee) {
+      // On mobile, if we have a selected employee, ensure details column is hidden
+      this.selectedEmployee = null;
+    }
+  }
+
+  isMobileView(): boolean {
+    return window.innerWidth <= 768;
   }
 
   private getCurrentCompanyUid(): string | null {
@@ -116,6 +138,7 @@ export class EmpseekComponent implements OnInit {
         }));
         this.filteredEmployees = [...this.employees];
         this.extractPositionOptions();
+        this.updatePagination();
         this.isLoading = false;
       },
       error: (err) => {
@@ -232,6 +255,9 @@ export class EmpseekComponent implements OnInit {
       }
       return matchesSearch && matchesPosition;
     });
+
+    this.currentPage = 1;
+    this.updatePagination();
     this.showFilterModal = false;
   }
 
@@ -245,7 +271,39 @@ export class EmpseekComponent implements OnInit {
     this.selectedPosition = '';
     this.selectedEmployee = null;
     this.filteredEmployees = [...this.employees];
+    this.currentPage = 1;
+    this.updatePagination();
     this.showFilterModal = false;
+  }
+
+  // Pagination methods
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredEmployees.length / this.itemsPerPage);
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedEmployees = this.filteredEmployees.slice(startIndex, endIndex);
+
+    // Reset selected employee if it's not on the current page
+    if (
+      this.selectedEmployee &&
+      !this.paginatedEmployees.some(e => e.uid === this.selectedEmployee?.uid)
+    ) {
+      this.selectedEmployee = null;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
   }
 
   hasPositions(employee: Employee): boolean {

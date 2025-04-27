@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { businessOutline, briefcaseOutline, mailOutline, callOutline, heart, heartOutline, filterOutline, closeOutline } from 'ionicons/icons';
+import { businessOutline, briefcaseOutline, mailOutline, callOutline, heart, heartOutline, filterOutline, closeOutline,} from 'ionicons/icons';
 import { FavouriteService } from '../../service/favourite.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ interface Company {
   name: string;
   email: string;
   phone: string;
-  positions: Array<{ id: number, position: string }>;
+  positions: Array<{ id: number; position: string }>;
   scope?: string;
   about?: string;
   formattedScope?: string;
@@ -25,7 +25,7 @@ interface Company {
   standalone: true,
   templateUrl: './favourite.component.html',
   styleUrls: ['./favourite.component.scss'],
-  imports: [CommonModule, FormsModule, IonicModule]
+  imports: [CommonModule, FormsModule, IonicModule],
 })
 export class FavouriteComponent implements OnInit {
   companies: Company[] = [];
@@ -37,7 +37,11 @@ export class FavouriteComponent implements OnInit {
   positionOptions: string[] = [];
   showFilterModal = false;
   selectedCompany: Company | null = null;
-  isFavorite = true; // Always true since we're in favorites page
+  isFavorite = true;
+  currentPage = 1;
+  itemsPerPage = 6;
+  paginatedCompanies: Company[] = [];
+  totalPages = 1;
 
   constructor(
     private favouriteService: FavouriteService,
@@ -46,20 +50,68 @@ export class FavouriteComponent implements OnInit {
     private router: Router,
     private toastController: ToastController
   ) {
-    addIcons({ 
-      businessOutline, 
+    addIcons({
+      businessOutline,
       briefcaseOutline,
       mailOutline,
       callOutline,
       heart,
       heartOutline,
       filterOutline,
-      closeOutline
+      closeOutline,
     });
   }
 
   ngOnInit() {
     this.loadFavourites();
+  }
+
+  isMobileView(): boolean {
+    return window.innerWidth <= 768;
+  }
+
+  updatePagination() {
+    // Recalculate total pages
+    this.totalPages = Math.ceil(
+      this.filteredCompanies.length / this.itemsPerPage
+    );
+
+    // Ensure current page is within valid range
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    } else if (this.totalPages === 0) {
+      this.currentPage = 1;
+    }
+
+    // Calculate new paginated companies
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedCompanies = this.filteredCompanies.slice(
+      startIndex,
+      endIndex
+    );
+
+    // Reset selected company if it's not on current page
+    if (
+      this.selectedCompany &&
+      !this.paginatedCompanies.some((c) => c.uid === this.selectedCompany?.uid)
+    ) {
+      this.selectedCompany = null;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
   }
 
   private getCurrentUserUid(): string | null {
@@ -72,10 +124,10 @@ export class FavouriteComponent implements OnInit {
         console.error('Error parsing session user:', e);
       }
     }
-    
-    return localStorage.getItem('user_uid') || 
-           sessionStorage.getItem('user_uid') || 
-           null;
+
+    return (localStorage.getItem('user_uid') ||
+            sessionStorage.getItem('user_uid') ||
+            null);
   }
 
   private async showLoginAlert() {
@@ -85,15 +137,15 @@ export class FavouriteComponent implements OnInit {
       buttons: [
         {
           text: 'Cancel',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Login',
           handler: () => {
             this.router.navigate(['/login']);
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   }
@@ -101,51 +153,60 @@ export class FavouriteComponent implements OnInit {
   loadFavourites() {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     const userUid = this.getCurrentUserUid();
-    
+
     if (!userUid) {
       this.errorMessage = 'User not logged in';
       this.isLoading = false;
       this.showLoginAlert();
       return;
     }
-    
+
     this.favouriteService.getFavourites(userUid).subscribe({
       next: (data: Company[]) => {
-        this.companies = data.map(company => ({
+        this.companies = data.map((company) => ({
           ...company,
           formattedScope: this.formatScope(company.scope),
-          formattedAbout: this.formatAbout(company.about)
+          formattedAbout: this.formatAbout(company.about),
         }));
         this.filteredCompanies = [...this.companies];
         this.extractPositionOptions();
+        this.currentPage = 1;
+        this.updatePagination();
         this.isLoading = false;
       },
       error: (err) => {
         this.errorMessage = 'Failed to load favourite companies. Please try again later.';
         this.isLoading = false;
         console.error('Error loading favourites:', err);
-      }
+      },
     });
   }
 
   async removeFromFavorites() {
     if (!this.selectedCompany) return;
-    
+
     const userUid = this.getCurrentUserUid();
     if (!userUid) {
       await this.showLoginAlert();
       return;
     }
-    
+
     try {
       await this.favouriteService.toggleFavourite(userUid, this.selectedCompany.uid).toPromise();
-      
+
       // Remove from local lists
-      this.companies = this.companies.filter(c => c.uid !== this.selectedCompany?.uid);
-      this.filteredCompanies = this.filteredCompanies.filter(c => c.uid !== this.selectedCompany?.uid);
-      
+      this.companies = this.companies.filter(
+        (c) => c.uid !== this.selectedCompany?.uid
+      );
+      this.filteredCompanies = this.filteredCompanies.filter(
+        (c) => c.uid !== this.selectedCompany?.uid
+      );
+
+      // Update pagination after removal
+      this.updatePagination();
+
       // Show success toast
       const toast = await this.toastController.create({
         message: 'Company removed from favorites',
@@ -155,13 +216,13 @@ export class FavouriteComponent implements OnInit {
         buttons: [
           {
             icon: 'close-outline',
-            role: 'cancel'
-          }
+            role: 'cancel',
+          },
         ],
         cssClass: 'top-toast'
       });
       await toast.present();
-      
+
       this.selectedCompany = null;
     } catch (err) {
       console.error('Error removing favorite:', err);
@@ -173,9 +234,9 @@ export class FavouriteComponent implements OnInit {
         buttons: [
           {
             icon: 'close-outline',
-            role: 'cancel'
-          }
-        ]
+            role: 'cancel',
+          },
+        ],
       });
       await toast.present();
     }
@@ -199,7 +260,7 @@ export class FavouriteComponent implements OnInit {
 
   extractPositionOptions() {
     const allPositions = new Set<string>();
-    this.companies.forEach(company => {
+    this.companies.forEach((company) => {
       company.positions.forEach((pos) => {
         allPositions.add(pos.position);
       });
@@ -208,26 +269,30 @@ export class FavouriteComponent implements OnInit {
   }
 
   applyFilters() {
-    this.filteredCompanies = this.companies.filter(company => {
-      const matchesSearch = this.searchTerm === '' || 
-        company.positions.some(pos => 
+    this.filteredCompanies = this.companies.filter((company) => {
+      const matchesSearch =
+        this.searchTerm === '' ||
+        company.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        company.positions.some((pos) =>
           pos.position.toLowerCase().includes(this.searchTerm.toLowerCase())
         );
-      
+
       let matchesPosition = true;
       if (this.selectedPosition) {
-        matchesPosition = company.positions.some(pos => 
-          pos.position === this.selectedPosition
+        matchesPosition = company.positions.some(
+          (pos) => pos.position === this.selectedPosition
         );
       }
       return matchesSearch && matchesPosition;
     });
+    this.currentPage = 1; 
+    this.updatePagination();
     this.showFilterModal = false;
   }
 
   clearSearch() {
     this.searchTerm = '';
-    this.applyFilters(); 
+    this.applyFilters();
   }
 
   clearFilters() {
@@ -235,6 +300,8 @@ export class FavouriteComponent implements OnInit {
     this.selectedPosition = '';
     this.selectedCompany = null;
     this.filteredCompanies = [...this.companies];
+    this.currentPage = 1;
+    this.updatePagination();
     this.showFilterModal = false;
   }
 
@@ -242,7 +309,7 @@ export class FavouriteComponent implements OnInit {
     this.selectedCompany = {
       ...company,
       formattedScope: this.formatScope(company.scope),
-      formattedAbout: this.formatAbout(company.about)
+      formattedAbout: this.formatAbout(company.about),
     };
   }
 

@@ -1,3 +1,4 @@
+<!-- jobseek.component.html -->
 <ion-content>
   <ion-header>
     <ion-toolbar color="primary">
@@ -11,13 +12,14 @@
   </ion-header>
 
   <!-- Search Bar -->
-  <ion-searchbar 
-    [(ngModel)]="searchTerm" 
+  <ion-searchbar
+    [(ngModel)]="searchTerm"
     (ionChange)="applyFilters()"
     (ionClear)="clearSearch()"
     placeholder="Search job position..."
     animated
-    class="search-bar">
+    class="search-bar"
+  >
   </ion-searchbar>
 
   <!-- Loading State -->
@@ -38,7 +40,10 @@
   </ion-card>
 
   <!-- Empty State -->
-  <div *ngIf="!isLoading && !errorMessage && filteredCompanies.length === 0" class="no-selection">
+  <div
+    *ngIf="!isLoading && !errorMessage && paginatedCompanies.length === 0"
+    class="no-selection"
+  >
     <ion-icon name="business-outline"></ion-icon>
     <h3>No Companies Found</h3>
     <p *ngIf="searchTerm || selectedPosition">Try adjusting your search or filters</p>
@@ -47,28 +52,51 @@
   </div>
 
   <!-- Main Content Area -->
-  <div *ngIf="!isLoading && !errorMessage && filteredCompanies.length > 0" class="main-content">
+  <div
+    *ngIf="!isLoading && !errorMessage && paginatedCompanies.length > 0"
+    class="main-content">
     <!-- Left Column - Company List -->
     <div class="company-list-column">
       <ion-list>
-        <ion-item 
-          *ngFor="let company of filteredCompanies" 
+        <ion-item
+          *ngFor="let company of paginatedCompanies"
           (click)="selectCompany(company)"
           [class.selected]="selectedCompany?.uid === company.uid">
           <ion-icon slot="start" name="business-outline"></ion-icon>
           <ion-label>
             <h2>{{ company.name }}</h2>
             <p *ngIf="hasPositions(company)">
-              {{ company.positions.length }} open position{{ company.positions.length !== 1 ? 's' : '' }}
+              {{ company.positions.length }} open position{{
+                company.positions.length !== 1 ? "s" : ""
+              }}
             </p>
             <p *ngIf="!hasPositions(company)">No open positions</p>
           </ion-label>
         </ion-item>
       </ion-list>
+
+      <!-- Pagination Controls -->
+      <ion-toolbar *ngIf="totalPages > 1" class="pagination-controls">
+        <ion-buttons slot="start">
+          <ion-button *ngIf="currentPage > 1" (click)="previousPage()">
+            Previous
+          </ion-button>
+        </ion-buttons>
+
+        <span class="page-info"
+          >Page {{ currentPage }} of {{ totalPages }}</span
+        >
+
+        <ion-buttons slot="end">
+          <ion-button *ngIf="currentPage < totalPages" (click)="nextPage()">
+            Next
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
     </div>
 
     <!-- Right Column - Details View -->
-    <div class="details-column">
+    <div class="details-column" *ngIf="!isMobileView()">
       <div *ngIf="!selectedCompany" class="no-selection">
         <ion-icon name="briefcase-outline"></ion-icon>
         <h3>Select a job</h3>
@@ -81,13 +109,13 @@
             <ion-card-title>
               <div class="title-row">
                 <span class="company-name">{{ selectedCompany.name }}</span>
-                <ion-button 
-                  fill="clear" 
-                  class="favorite-btn" 
+                <ion-button
+                  fill="clear"
+                  class="favorite-btn"
                   (click)="toggleFavorite()"
                   [disabled]="!selectedCompany">
-                  <ion-icon 
-                    [name]="isFavorite ? 'heart' : 'heart-outline'" 
+                  <ion-icon
+                    [name]="isFavorite ? 'heart' : 'heart-outline'"
                     [color]="isFavorite ? 'danger' : 'medium'">
                   </ion-icon>
                 </ion-button>
@@ -101,7 +129,7 @@
               <ion-list-header>
                 <ion-label>Open Positions</ion-label>
               </ion-list-header>
-              
+
               <ion-item *ngFor="let position of selectedCompany.positions">
                 <ion-icon name="briefcase-outline" slot="start"></ion-icon>
                 <ion-label>{{ position.position }}</ion-label>
@@ -113,7 +141,7 @@
               <ion-list-header>
                 <ion-label> Job Scope </ion-label>
               </ion-list-header>
-              
+
               <div class="scope-content" [innerHTML]="getSafeHtml(selectedCompany.formattedScope)"></div>
             </div>
 
@@ -122,16 +150,16 @@
               <ion-list-header>
                 <ion-label>About The Company</ion-label>
               </ion-list-header>
-              
+
               <div class="about-content" [innerHTML]="getSafeHtml(selectedCompany.formattedAbout)"></div>
             </div>
-            
+
             <!-- Contact Information -->
             <div class="section">
               <ion-list-header>
                 <ion-label>Contact Information</ion-label>
               </ion-list-header>
-              
+
               <ion-item>
                 <ion-icon name="mail-outline" slot="start"></ion-icon>
                 <ion-label>
@@ -139,7 +167,7 @@
                   <p>{{ selectedCompany.email }}</p>
                 </ion-label>
               </ion-item>
-              
+
               <ion-item>
                 <ion-icon name="call-outline" slot="start"></ion-icon>
                 <ion-label>
@@ -154,8 +182,110 @@
     </div>
   </div>
 
+  <ion-modal
+    [isOpen]="isMobileView() && selectedCompany !== null"
+    (didDismiss)="selectedCompany = null"
+  >
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Job Details</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="selectedCompany = null">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <div *ngIf="selectedCompany" class="company-details">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>
+                <div class="title-row">
+                  <span class="company-name">{{ selectedCompany.name }}</span>
+                  <ion-button
+                    fill="clear"
+                    class="favorite-btn"
+                    (click)="toggleFavorite()"
+                    [disabled]="!selectedCompany"
+                  >
+                    <ion-icon
+                      [name]="isFavorite ? 'heart' : 'heart-outline'"
+                      [color]="isFavorite ? 'danger' : 'medium'"
+                    >
+                    </ion-icon>
+                  </ion-button>
+                </div>
+              </ion-card-title>
+            </ion-card-header>
+
+            <ion-card-content>
+              <!-- Positions -->
+              <div *ngIf="hasPositions(selectedCompany)" class="section">
+                <ion-list-header>
+                  <ion-label>Open Positions</ion-label>
+                </ion-list-header>
+
+                <ion-item *ngFor="let position of selectedCompany.positions">
+                  <ion-icon name="briefcase-outline" slot="start"></ion-icon>
+                  <ion-label>{{ position.position }}</ion-label>
+                </ion-item>
+              </div>
+
+              <!-- Job Scope -->
+              <div *ngIf="hasScope(selectedCompany)" class="section">
+                <ion-list-header>
+                  <ion-label> Job Scope </ion-label>
+                </ion-list-header>
+
+                <div
+                  class="scope-content"
+                  [innerHTML]="getSafeHtml(selectedCompany.formattedScope)"
+                ></div>
+              </div>
+
+              <!-- About The Company -->
+              <div *ngIf="hasAbout(selectedCompany)" class="section">
+                <ion-list-header>
+                  <ion-label>About The Company</ion-label>
+                </ion-list-header>
+
+                <div
+                  class="about-content"
+                  [innerHTML]="getSafeHtml(selectedCompany.formattedAbout)"
+                ></div>
+              </div>
+
+              <!-- Contact Information -->
+              <div class="section">
+                <ion-list-header>
+                  <ion-label>Contact Information</ion-label>
+                </ion-list-header>
+
+                <ion-item>
+                  <ion-icon name="mail-outline" slot="start"></ion-icon>
+                  <ion-label>
+                    <h3>Email</h3>
+                    <p>{{ selectedCompany.email }}</p>
+                  </ion-label>
+                </ion-item>
+
+                <ion-item>
+                  <ion-icon name="call-outline" slot="start"></ion-icon>
+                  <ion-label>
+                    <h3>Phone</h3>
+                    <p>{{ selectedCompany.phone }}</p>
+                  </ion-label>
+                </ion-item>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
   <!-- Filter Modal -->
-  <ion-modal [isOpen]="showFilterModal" (didDismiss)="showFilterModal = false">
+  <ion-modal [isOpen]="showFilterModal" (didDismiss)="showFilterModal = false" class="filter-modal">
     <ng-template>
       <ion-header>
         <ion-toolbar>
@@ -177,7 +307,7 @@
             </ion-select>
           </ion-item>
         </ion-list>
-        
+
         <div class="filter-actions">
           <ion-button expand="block" (click)="clearFilters()" fill="outline">
             Clear Filters

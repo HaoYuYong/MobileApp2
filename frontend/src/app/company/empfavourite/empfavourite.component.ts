@@ -31,6 +31,7 @@ interface Employee {
 export class EmpfavouriteComponent implements OnInit {
   employees: Employee[] = [];
   filteredEmployees: Employee[] = [];
+  paginatedEmployees: Employee[] = [];
   isLoading = true;
   errorMessage = '';
   searchTerm = '';
@@ -38,6 +39,9 @@ export class EmpfavouriteComponent implements OnInit {
   positionOptions: string[] = [];
   showFilterModal = false;
   selectedEmployee: Employee | null = null;
+  currentPage = 1;
+  itemsPerPage = 6;
+  totalPages = 1;
 
   constructor(
     private empfavouriteService: EmpfavouriteService,
@@ -62,6 +66,54 @@ export class EmpfavouriteComponent implements OnInit {
 
   ngOnInit() {
     this.loadFavourites();
+  }
+
+  isMobileView(): boolean {
+    return window.innerWidth <= 768;
+  }
+
+  updatePagination() {
+    // Recalculate total pages
+    this.totalPages = Math.ceil(
+      this.filteredEmployees.length / this.itemsPerPage
+    );
+
+    // Ensure current page is within valid range
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    } else if (this.totalPages === 0) {
+      this.currentPage = 1;
+    }
+
+    // Calculate new paginated employees
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedEmployees = this.filteredEmployees.slice(
+      startIndex,
+      endIndex
+    );
+
+    // Reset selected employee if it's not on current page
+    if (
+      this.selectedEmployee &&
+      !this.paginatedEmployees.some((e) => e.uid === this.selectedEmployee?.uid)
+    ) {
+      this.selectedEmployee = null;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
   }
 
   private getCurrentCompanyUid(): string | null {
@@ -115,7 +167,7 @@ export class EmpfavouriteComponent implements OnInit {
           side: 'end'
         }
       ],
-        cssClass: 'top-toast'
+      cssClass: 'top-toast'
     });
     await toast.present();
   }
@@ -125,7 +177,6 @@ export class EmpfavouriteComponent implements OnInit {
     this.errorMessage = '';
     
     const companyUid = this.getCurrentCompanyUid();
-    console.log('Loading favorites for company:', companyUid);
     
     if (!companyUid) {
       this.errorMessage = 'Company not logged in';
@@ -142,6 +193,8 @@ export class EmpfavouriteComponent implements OnInit {
         }));
         this.filteredEmployees = [...this.employees];
         this.extractPositionOptions();
+        this.currentPage = 1;
+        this.updatePagination();
         this.isLoading = false;
       },
       error: (err) => {
@@ -164,10 +217,14 @@ export class EmpfavouriteComponent implements OnInit {
     
     try {
       await this.empfavouriteService.toggleEmployeeFavourite(companyUid, this.selectedEmployee.uid).toPromise();
+      
       // Remove from local lists
       this.employees = this.employees.filter(e => e.uid !== this.selectedEmployee?.uid);
       this.filteredEmployees = this.filteredEmployees.filter(e => e.uid !== this.selectedEmployee?.uid);
-      
+
+      // Update pagination after removal
+      this.updatePagination();
+
       // Show success toast
       await this.showToast('Employee removed from favorites');
       
@@ -213,6 +270,8 @@ export class EmpfavouriteComponent implements OnInit {
       }
       return matchesSearch && matchesPosition;
     });
+    this.currentPage = 1;
+    this.updatePagination();
     this.showFilterModal = false;
   }
 
@@ -226,6 +285,8 @@ export class EmpfavouriteComponent implements OnInit {
     this.selectedPosition = '';
     this.selectedEmployee = null;
     this.filteredEmployees = [...this.employees];
+    this.currentPage = 1;
+    this.updatePagination();
     this.showFilterModal = false;
   }
 

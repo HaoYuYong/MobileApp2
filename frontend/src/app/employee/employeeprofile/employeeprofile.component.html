@@ -1,7 +1,31 @@
 <ion-content>
-  <!-- First Container - Profile Details -->
+  <!-- New Container for Job Availability Toggle -->
+  <div class="container job-availability-container">
+    <div class="title">Job Availability</div>
+    <div class="availability-content">
+      <ion-item lines="none">
+        <ion-toggle
+          [(ngModel)]="profileVisibility"
+          (ionChange)="updateProfileVisibility()"
+          [enableOnOffLabels]="true"
+        >
+          <div class="toggle-label">
+            <ion-icon name="briefcase-outline"></ion-icon>
+            <span>I'm open for job opportunities</span>
+          </div>
+        </ion-toggle>
+      </ion-item>
+      <p class="toggle-description">
+        When enabled, companies will be able to view your profile and contact
+        you
+      </p>
+    </div>
+  </div>
+
   <div class="container">
-    <div class="title">{{ userProfile?.name ? userProfile.name : 'My Profile' }}</div>
+    <div class="title">
+      {{ userProfile?.name ? userProfile.name : "My Profile" }}
+    </div>
     
     <div class="content">
       <!-- Loading and error states -->

@@ -26,6 +26,7 @@ class User(models.Model):
     security_question = models.CharField(max_length=255, choices=SECURITY_QUESTION_CHOICES)
     security_answer = models.CharField(max_length=255)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='employee')
+    is_visible = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

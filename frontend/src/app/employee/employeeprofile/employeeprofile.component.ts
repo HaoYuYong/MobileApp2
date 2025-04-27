@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ProfileService } from '../../service/profile.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { AlertController } from '@ionic/angular';
 import { environment } from '../../../environments/environment';
@@ -44,6 +44,7 @@ export class EmployeeprofileComponent implements OnInit {
   isLoading = true;
   errorMessage = '';
   isDropdownOpen = false;
+  profileVisibility = false;
   
   // Registered data properties
   isProfileEditMode: boolean = false;
@@ -120,7 +121,8 @@ export class EmployeeprofileComponent implements OnInit {
   constructor(
     private profileService: ProfileService,
     private http: HttpClient,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private toastController: ToastController,
   ) {
     // Register both outline and non-outline versions of icons
     addIcons({
@@ -157,6 +159,8 @@ export class EmployeeprofileComponent implements OnInit {
         next: (profile) => {
           console.log('Profile loaded:', profile);
           this.userProfile = profile;
+          this.profileVisibility =
+            this.userProfile?.is_visible_to_companies || false;
           this.isLoading = false;
           this.loadJobPositions(user.uid);
           this.loadAboutMe(user.uid);
@@ -860,6 +864,62 @@ async deleteSkill(sid: number) {
   });
 
   await alert.present();
+}
+
+// update profile visibility
+async updateProfileVisibility() {
+  const userData = sessionStorage.getItem('currentUser');
+  if (!userData) {
+    this.showAlert('Error', 'User not logged in');
+    return;
+  }
+
+  const user = JSON.parse(userData);
+  this.isLoading = true;
+
+  try {
+    const response = await this.http
+      .put<any>(`${this.apiUrl}/api/user/update-visibility/`, {
+        uid: user.uid,
+        is_visible: this.profileVisibility,
+      })
+      .toPromise();
+
+    if (response.success) {
+      // Update local profile data
+      this.userProfile.is_visible = this.profileVisibility;
+      sessionStorage.setItem(
+        'currentUser',
+        JSON.stringify({
+          ...user,
+          is_visible: this.profileVisibility,
+        })
+      );
+
+      await this.presentToast(
+        `Profile is now ${
+          this.profileVisibility ? 'visible' : 'private'
+        } to companies`
+      );
+    }
+  } catch (err) {
+    console.error('Error updating visibility:', err);
+    // Revert the toggle if update fails
+    this.profileVisibility = !this.profileVisibility;
+    await this.presentToast('Failed to update visibility', 'danger');
+  } finally {
+    this.isLoading = false;
+  }
+}
+
+private async presentToast(message: string, color: string = 'success') {
+  const toast = await this.toastController.create({
+    message,
+    duration: 2000,
+    color,
+    position: 'top',
+  });
+  await toast.present();
 }
 
 }

@@ -1,4 +1,26 @@
 <ion-content>
+  <div class="container open-vacancy-container">
+    <div class="title">Job Postings</div>
+    <div class="availability-content">
+      <ion-item lines="none">
+        <ion-toggle
+          [(ngModel)]="profileVisibility"
+          (ionChange)="updateProfileVisibility()"
+          [enableOnOffLabels]="true"
+        >
+          <div class="toggle-label">
+            <ion-icon name="briefcase-outline"></ion-icon>
+            <span>Open Vacancy</span>
+          </div>
+        </ion-toggle>
+      </ion-item>
+      <p class="toggle-description">
+        When enabled, employees will be able to view your profile and contact
+        you
+      </p>
+    </div>
+  </div>
+
   <div class="container">
     <div class="title">{{ userProfile?.name || 'Company Profile' }}</div>
     
@@ -152,7 +174,7 @@
     <div class="modal-content">
       <ion-item>
         <ion-label position="stacked">Position</ion-label>
-        <ion-select [(ngModel)]="selectedPosition" interface="popover">
+        <ion-select [(ngModel)]="selectedPosition" interface="popover" placeholder="Select a position">
           <ion-select-option *ngFor="let pos of positionOptions" [value]="pos">
             {{ pos }}
           </ion-select-option>

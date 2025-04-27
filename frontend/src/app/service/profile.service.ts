@@ -362,5 +362,11 @@ deleteSkill(sid: number): Observable<any> {
     })
   );
 }
+
+updateVisibility(isVisible: boolean): Observable<any> {
+  return this.http.patch(`${this.apiUrl}/profile/visibility`, {
+    is_visible_to_companies: isVisible,
+  });
+}
 }
 

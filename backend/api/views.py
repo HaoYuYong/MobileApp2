@@ -1,5 +1,7 @@
 import json
 from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
 from .models import User, JobPosition, AboutMe, Education, WorkExperience, Skills, JobScope, Favourite
@@ -717,7 +719,9 @@ def job_scope_handler(request):
 @require_http_methods(["GET"])
 def get_companies_with_positions_and_scopes(request):
     try:
-        companies = User.objects.filter(role='company').values('uid', 'name', 'email', 'phone')
+        companies = User.objects.filter(role='company', is_visible=True)
+
+        companies = companies.values('uid', 'name', 'email', 'phone', 'is_visible')
         
         company_data = []
         for company in companies:
@@ -738,6 +742,7 @@ def get_companies_with_positions_and_scopes(request):
                 'name': company['name'],
                 'email': company['email'],
                 'phone': company['phone'],
+                'is_visible': company['is_visible'],
                 'positions': list(positions),
                 'scope': scope,
                 'about': about
@@ -792,7 +797,7 @@ def get_favourites(request):
         return JsonResponse({'error': 'user_uid is required'}, status=400)
     
     try:
-        favourites = Favourite.objects.filter(user__uid=user_uid).select_related('company')
+        favourites = Favourite.objects.filter(user__uid=user_uid, company__is_visible=True).select_related('company')
         
         favourite_companies = []
         for fav in favourites:
@@ -812,6 +817,7 @@ def get_favourites(request):
                 'name': company.name,
                 'email': company.email,
                 'phone': company.phone,
+                'is_visible': company.is_visible,
                 'positions': list(positions),
                 'scope': scope,
                 'about': about
@@ -826,8 +832,19 @@ def get_favourites(request):
 @require_http_methods(["GET"])
 def get_employees_with_details(request):
     try:
-        employees = User.objects.filter(role='employee').values('uid', 'name', 'email', 'phone')
+        # Get visibility filter from query params (default to True if not specified)
+        visible_only = request.GET.get('visible_only', 'true').lower() == 'true'
         
+        employees = User.objects.filter(role='employee')
+        
+        # Apply visibility filter if needed
+        if visible_only:
+            employees = employees.filter(is_visible=True)
+        
+        # Get basic employee info
+        employees = employees.values('uid', 'name', 'email', 'phone', 'is_visible')     
+
+
         employee_data = []
         for employee in employees:
             positions = JobPosition.objects.filter(user__uid=employee['uid']).values('id', 'position')
@@ -845,6 +862,7 @@ def get_employees_with_details(request):
                 'name': employee['name'],
                 'email': employee['email'],
                 'phone': employee['phone'],
+                'is_visible': employee['is_visible'],
                 'positions': list(positions),
                 'about': about,
                 'educations': list(educations.values()),
@@ -865,7 +883,7 @@ def get_employee_favourites(request):
         return JsonResponse({'error': 'company_uid is required'}, status=400)
     
     try:
-        favourites = Favourite.objects.filter(company__uid=company_uid).select_related('user')
+        favourites = Favourite.objects.filter(company__uid=company_uid, user__is_visible=True).select_related('user')
         
         favourite_employees = []
         for fav in favourites:
@@ -884,6 +902,7 @@ def get_employee_favourites(request):
                 'name': employee.name,
                 'email': employee.email,
                 'phone': employee.phone,
+                'is_visible': employee.is_visible,
                 'positions': list(positions),
                 'about': about,
                 'educations': list(educations.values()),
@@ -930,3 +949,25 @@ def toggle_employee_favourite(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+@api_view(['PUT'])
+def update_visibility(request):
+    try:
+        uid = request.data.get('uid', None)
+        is_visible = request.data.get('is_visible', None)
+        
+        if not uid or is_visible is None:
+            return Response({'error': 'UID and visibility status are required'}, status=400)
+            
+        user = User.objects.filter(uid=uid).first()
+        if not user:
+            return Response({'error': 'User not found'}, status=404)
+            
+        user.is_visible = is_visible
+        user.save()
+        
+        return Response({'success': True, 'is_visible': user.is_visible})
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
